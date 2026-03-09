@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 如果需要拍照功能，添加相机权限 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- 如果需要读取相册，添加存储权限（Android 13+ 需要不同权限） -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Android 13+ 需要这个权限来读取图片和视频 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- 如果需要网络功能（比如AI分析调用API），添加网络权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ExoticPet"
+        tools:targetApi="31">
+
+        <!-- 主Activity - 带底部导航栏 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 编辑档案页面 -->
+        <activity
+            android:name=".EditPetActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <!-- 新增记录页面 -->
+        <activity
+            android:name=".AddRecordActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <!-- AI分析页面 - 注意：现在是通过Fragment显示，但如果你希望它作为独立Activity，可以保留
+             如果完全使用Fragment，可以删除这个activity声明 -->
+        <!--
+        <activity
+            android:name=".AIAnalysisActivity"
+            android:exported="false" />
+        -->
+
+        <!-- 监控页面 - 同样，如果作为Fragment使用，可以注释掉 -->
+        <!--
+        <activity
+            android:name=".MonitorActivity"
+            android:exported="false" />
+        -->
+
+        <!-- 历史记录页面 - 如果作为Fragment使用，可以注释掉 -->
+        <!--
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false" />
+        -->
+
+    </application>
+
+</manifest>
