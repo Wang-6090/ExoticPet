@@ -1,0 +1,1835 @@
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\">\r\n\r\n    <!-- ========== 所有权限声明必须在 application 外部 ========== -->\r\n\r\n    <!-- 网络权限（用于AI分析API调用） -->\r\n    <uses-permission android:name=\"android.permission.INTERNET\" />\r\n\r\n    <!-- 相机权限（用于拍照） -->\r\n    <uses-permission android:name=\"android.permission.CAMERA\" />\r\n\r\n    <!-- 存储权限（用于从相册选择图片） -->\r\n    <uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />\r\n\r\n    <!-- Android 13+ 需要这个权限来读取图片和视频 -->\r\n    <uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\" />\r\n\r\n    <!-- 声明相机硬件为可选（这样没有相机的设备也能安装） -->\r\n    <uses-feature\r\n        android:name=\"android.hardware.camera\"\r\n        android:required=\"false\" />\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:dataExtractionRules=\"@xml/data_extraction_rules\"\r\n        android:fullBackupContent=\"@xml/backup_rules\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/Theme.ExoticPet\"\r\n        android:usesCleartextTraffic=\"true\"\r\n        tools:targetApi=\"31\">\r\n\r\n        <!-- 主Activity - 带底部导航栏 -->\r\n        <activity\r\n            android:name=\".MainActivity\"\r\n            android:exported=\"false\"\r\n            android:windowSoftInputMode=\"adjustResize\" />\r\n\r\n        <activity\r\n            android:name=\".LoginActivity\"\r\n            android:exported=\"true\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n\r\n        <activity\r\n            android:name=\".RegisterActivity\"\r\n            android:exported=\"false\" />\r\n\r\n        <!-- 编辑档案页面 -->\r\n        <activity\r\n            android:name=\".EditPetActivity\"\r\n            android:exported=\"false\"\r\n            android:parentActivityName=\".MainActivity\" />\r\n\r\n        <!-- 新增记录页面 -->\r\n        <activity\r\n            android:name=\".AddRecordActivity\"\r\n            android:exported=\"false\"\r\n            android:parentActivityName=\".MainActivity\" />\r\n\r\n        <!-- 注意：AI分析页面现在通过Fragment在MainActivity中显示 -->\r\n        <!-- 不需要单独的Activity声明 -->\r\n\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+--- a/app/src/main/AndroidManifest.xml	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/app/src/main/AndroidManifest.xml	(date 1774460437511)
+@@ -2,24 +2,21 @@
+ <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:tools="http://schemas.android.com/tools">
+ 
+-    <!-- ========== 所有权限声明必须在 application 外部 ========== -->
+-
+-    <!-- 网络权限（用于AI分析API调用） -->
++    <!-- 现有权限 -->
+     <uses-permission android:name="android.permission.INTERNET" />
+-
+-    <!-- 相机权限（用于拍照） -->
++    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+     <uses-permission android:name="android.permission.CAMERA" />
+-
+-    <!-- 存储权限（用于从相册选择图片） -->
+     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+-
+-    <!-- Android 13+ 需要这个权限来读取图片和视频 -->
++    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+ 
+-    <!-- 声明相机硬件为可选（这样没有相机的设备也能安装） -->
+-    <uses-feature
+-        android:name="android.hardware.camera"
+-        android:required="false" />
++    <!-- 新增：前台服务权限 -->
++    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
++    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
++    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
++
++    <uses-feature android:name="android.hardware.camera" android:required="false" />
++    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+ 
+     <application
+         android:allowBackup="true"
+@@ -33,39 +30,32 @@
+         android:usesCleartextTraffic="true"
+         tools:targetApi="31">
+ 
+-        <!-- 主Activity - 带底部导航栏 -->
+         <activity
+             android:name=".MainActivity"
+-            android:exported="false"
+-            android:windowSoftInputMode="adjustResize" />
+-
+-        <activity
+-            android:name=".LoginActivity"
+-            android:exported="true">
++            android:exported="true"
++            android:windowSoftInputMode="adjustResize">
+             <intent-filter>
+                 <action android:name="android.intent.action.MAIN" />
+                 <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
+         </activity>
+ 
+-        <activity
+-            android:name=".RegisterActivity"
+-            android:exported="false" />
+-
+-        <!-- 编辑档案页面 -->
+         <activity
+             android:name=".EditPetActivity"
+             android:exported="false"
+             android:parentActivityName=".MainActivity" />
+ 
+-        <!-- 新增记录页面 -->
+         <activity
+             android:name=".AddRecordActivity"
+             android:exported="false"
+             android:parentActivityName=".MainActivity" />
+ 
+-        <!-- 注意：AI分析页面现在通过Fragment在MainActivity中显示 -->
+-        <!-- 不需要单独的Activity声明 -->
++        <!-- 新增：监控服务 -->
++        <service
++            android:name=".CameraMonitorService"
++            android:enabled="true"
++            android:exported="false"
++            android:foregroundServiceType="camera" />
+ 
+     </application>
+ 
+Index: app/src/main/java/com/example/exoticpet/RegisterActivity.kt
+===================================================================
+diff --git a/app/src/main/java/com/example/exoticpet/RegisterActivity.kt b/app/src/main/java/com/example/exoticpet/RegisterActivity.kt
+deleted file mode 100644
+--- a/app/src/main/java/com/example/exoticpet/RegisterActivity.kt	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ /dev/null	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
+@@ -1,78 +0,0 @@
+-package com.example.exoticpet
+-
+-import android.os.Bundle
+-import android.widget.Button
+-import android.widget.EditText
+-import android.widget.TextView
+-import android.widget.Toast
+-import androidx.appcompat.app.AppCompatActivity
+-import androidx.lifecycle.lifecycleScope
+-import com.example.exoticpet.api.RegisterRequest
+-import com.example.exoticpet.api.RetrofitClient
+-import kotlinx.coroutines.launch
+-
+-class RegisterActivity : AppCompatActivity() {
+-
+-    private lateinit var etRegisterUsername: EditText
+-    private lateinit var etRegisterPassword: EditText
+-    private lateinit var etConfirmPassword: EditText
+-    private lateinit var btnRegister: Button
+-    private lateinit var tvGoLogin: TextView
+-
+-    override fun onCreate(savedInstanceState: Bundle?) {
+-        super.onCreate(savedInstanceState)
+-        setContentView(R.layout.activity_register)
+-
+-        etRegisterUsername = findViewById(R.id.etRegisterUsername)
+-        etRegisterPassword = findViewById(R.id.etRegisterPassword)
+-        etConfirmPassword = findViewById(R.id.etConfirmPassword)
+-        btnRegister = findViewById(R.id.btnRegister)
+-        tvGoLogin = findViewById(R.id.tvGoLogin)
+-
+-        btnRegister.setOnClickListener {
+-            register()
+-        }
+-
+-        tvGoLogin.setOnClickListener {
+-            finish()
+-        }
+-    }
+-
+-    private fun register() {
+-        val username = etRegisterUsername.text.toString().trim()
+-        val password = etRegisterPassword.text.toString().trim()
+-        val confirmPassword = etConfirmPassword.text.toString().trim()
+-
+-        if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+-            Toast.makeText(this, "请完整填写注册信息", Toast.LENGTH_SHORT).show()
+-            return
+-        }
+-
+-        if (password != confirmPassword) {
+-            Toast.makeText(this, "两次密码不一致", Toast.LENGTH_SHORT).show()
+-            return
+-        }
+-
+-        lifecycleScope.launch {
+-            try {
+-                btnRegister.isEnabled = false
+-                val response = RetrofitClient.instance.register(RegisterRequest(username, password))
+-
+-                if (response.isSuccessful && response.body()?.success == true) {
+-                    Toast.makeText(this@RegisterActivity, "注册成功，请登录", Toast.LENGTH_SHORT).show()
+-                    finish()
+-                } else {
+-                    Toast.makeText(
+-                        this@RegisterActivity,
+-                        response.body()?.message ?: "注册失败",
+-                        Toast.LENGTH_SHORT
+-                    ).show()
+-                }
+-            } catch (e: Exception) {
+-                Toast.makeText(this@RegisterActivity, "网络错误：${e.message}", Toast.LENGTH_SHORT).show()
+-            } finally {
+-                btnRegister.isEnabled = true
+-            }
+-        }
+-    }
+-}
+\ No newline at end of file
+Index: app/src/main/java/com/example/exoticpet/LoginActivity.kt
+===================================================================
+diff --git a/app/src/main/java/com/example/exoticpet/LoginActivity.kt b/app/src/main/java/com/example/exoticpet/LoginActivity.kt
+deleted file mode 100644
+--- a/app/src/main/java/com/example/exoticpet/LoginActivity.kt	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ /dev/null	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
+@@ -1,89 +0,0 @@
+-package com.example.exoticpet
+-
+-import android.content.Intent
+-import android.content.SharedPreferences
+-import android.os.Bundle
+-import android.widget.Button
+-import android.widget.EditText
+-import android.widget.TextView
+-import android.widget.Toast
+-import androidx.appcompat.app.AppCompatActivity
+-import androidx.core.content.edit
+-import androidx.lifecycle.lifecycleScope
+-import com.example.exoticpet.api.LoginRequest
+-import com.example.exoticpet.api.RetrofitClient
+-import kotlinx.coroutines.launch
+-
+-class LoginActivity : AppCompatActivity() {
+-
+-    private lateinit var etUsername: EditText
+-    private lateinit var etPassword: EditText
+-    private lateinit var btnLogin: Button
+-    private lateinit var tvGoRegister: TextView
+-    private lateinit var prefs: SharedPreferences
+-
+-    override fun onCreate(savedInstanceState: Bundle?) {
+-        super.onCreate(savedInstanceState)
+-
+-        prefs = getSharedPreferences("auth_pref", MODE_PRIVATE)
+-        if (prefs.getBoolean("is_logged_in", false)) {
+-            startActivity(Intent(this, MainActivity::class.java))
+-            finish()
+-            return
+-        }
+-
+-        setContentView(R.layout.activity_login)
+-
+-        etUsername = findViewById(R.id.etUsername)
+-        etPassword = findViewById(R.id.etPassword)
+-        btnLogin = findViewById(R.id.btnLogin)
+-        tvGoRegister = findViewById(R.id.tvGoRegister)
+-
+-        btnLogin.setOnClickListener {
+-            login()
+-        }
+-
+-        tvGoRegister.setOnClickListener {
+-            startActivity(Intent(this, RegisterActivity::class.java))
+-        }
+-    }
+-
+-    private fun login() {
+-        val username = etUsername.text.toString().trim()
+-        val password = etPassword.text.toString().trim()
+-
+-        if (username.isEmpty() || password.isEmpty()) {
+-            Toast.makeText(this, "用户名和密码不能为空", Toast.LENGTH_SHORT).show()
+-            return
+-        }
+-
+-        lifecycleScope.launch {
+-            try {
+-                btnLogin.isEnabled = false
+-                val response = RetrofitClient.instance.login(LoginRequest(username, password))
+-
+-                if (response.isSuccessful && response.body()?.success == true) {
+-                    prefs.edit {
+-                        putBoolean("is_logged_in", true)
+-                        putInt("user_id", response.body()?.userId ?: 0)
+-                        putString("username", response.body()?.username ?: username)
+-                        putString("token", response.body()?.token ?: "")
+-                    }
+-                    Toast.makeText(this@LoginActivity, "登录成功", Toast.LENGTH_SHORT).show()
+-                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+-                    finish()
+-                } else {
+-                    Toast.makeText(
+-                        this@LoginActivity,
+-                        response.body()?.message ?: "登录失败",
+-                        Toast.LENGTH_SHORT
+-                    ).show()
+-                }
+-            } catch (e: Exception) {
+-                Toast.makeText(this@LoginActivity, "网络错误：${e.message}", Toast.LENGTH_SHORT).show()
+-            } finally {
+-                btnLogin.isEnabled = true
+-            }
+-        }
+-    }
+-}
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_login.xml
+===================================================================
+diff --git a/app/src/main/res/layout/activity_login.xml b/app/src/main/res/layout/activity_login.xml
+deleted file mode 100644
+--- a/app/src/main/res/layout/activity_login.xml	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ /dev/null	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
+@@ -1,50 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-    android:layout_width="match_parent"
+-    android:layout_height="match_parent"
+-    android:orientation="vertical"
+-    android:gravity="center"
+-    android:padding="24dp"
+-    android:background="@android:color/white">
+-
+-    <TextView
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:text="用户登录"
+-        android:textSize="28sp"
+-        android:textStyle="bold"
+-        android:textColor="@android:color/black"
+-        android:layout_marginBottom="32dp" />
+-
+-    <EditText
+-        android:id="@+id/etUsername"
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:hint="请输入用户名"
+-        android:inputType="text"
+-        android:layout_marginBottom="16dp" />
+-
+-    <EditText
+-        android:id="@+id/etPassword"
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:hint="请输入密码"
+-        android:inputType="textPassword"
+-        android:layout_marginBottom="24dp" />
+-
+-    <Button
+-        android:id="@+id/btnLogin"
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:text="登录"
+-        android:layout_marginBottom="20dp" />
+-
+-    <TextView
+-        android:id="@+id/tvGoRegister"
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:text="没有账号？去注册"
+-        android:textSize="16sp"
+-        android:textColor="#1976D2" />
+-
+-</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/res/layout/activity_register.xml
+===================================================================
+diff --git a/app/src/main/res/layout/activity_register.xml b/app/src/main/res/layout/activity_register.xml
+deleted file mode 100644
+--- a/app/src/main/res/layout/activity_register.xml	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ /dev/null	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
+@@ -1,58 +0,0 @@
+-<?xml version="1.0" encoding="utf-8"?>
+-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-    android:layout_width="match_parent"
+-    android:layout_height="match_parent"
+-    android:orientation="vertical"
+-    android:gravity="center"
+-    android:padding="24dp"
+-    android:background="@android:color/white">
+-
+-    <TextView
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:text="用户注册"
+-        android:textSize="28sp"
+-        android:textStyle="bold"
+-        android:textColor="@android:color/black"
+-        android:layout_marginBottom="32dp" />
+-
+-    <EditText
+-        android:id="@+id/etRegisterUsername"
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:hint="请输入用户名"
+-        android:inputType="text"
+-        android:layout_marginBottom="16dp" />
+-
+-    <EditText
+-        android:id="@+id/etRegisterPassword"
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:hint="请输入密码"
+-        android:inputType="textPassword"
+-        android:layout_marginBottom="16dp" />
+-
+-    <EditText
+-        android:id="@+id/etConfirmPassword"
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:hint="请再次输入密码"
+-        android:inputType="textPassword"
+-        android:layout_marginBottom="24dp" />
+-
+-    <Button
+-        android:id="@+id/btnRegister"
+-        android:layout_width="match_parent"
+-        android:layout_height="wrap_content"
+-        android:text="注册"
+-        android:layout_marginBottom="20dp" />
+-
+-    <TextView
+-        android:id="@+id/tvGoLogin"
+-        android:layout_width="wrap_content"
+-        android:layout_height="wrap_content"
+-        android:text="已有账号？返回登录"
+-        android:textSize="16sp"
+-        android:textColor="#1976D2" />
+-
+-</LinearLayout>
+\ No newline at end of file
+Index: app/src/main/java/com/example/exoticpet/RetrofitClient.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.exoticpet.api\r\n\r\nimport okhttp3.OkHttpClient\r\nimport okhttp3.logging.HttpLoggingInterceptor\r\nimport retrofit2.Retrofit\r\nimport retrofit2.converter.gson.GsonConverterFactory\r\nimport java.util.concurrent.TimeUnit\r\n\r\nobject RetrofitClient {\r\n\r\n    private const val BASE_URL = \"http://10.0.2.2:8080/api/\"  // 替换为实际的API地址\r\n\r\n    private val client = OkHttpClient.Builder()\r\n        .addInterceptor(HttpLoggingInterceptor().apply {\r\n            level = HttpLoggingInterceptor.Level.BODY\r\n        })\r\n        .connectTimeout(30, TimeUnit.SECONDS)\r\n        .readTimeout(30, TimeUnit.SECONDS)\r\n        .writeTimeout(30, TimeUnit.SECONDS)\r\n        .build()\r\n\r\n    val instance: ApiService by lazy {\r\n        Retrofit.Builder()\r\n            .baseUrl(BASE_URL)\r\n            .client(client)\r\n            .addConverterFactory(GsonConverterFactory.create())\r\n            .build()\r\n            .create(ApiService::class.java)\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/exoticpet/RetrofitClient.kt b/app/src/main/java/com/example/exoticpet/RetrofitClient.kt
+--- a/app/src/main/java/com/example/exoticpet/RetrofitClient.kt	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/app/src/main/java/com/example/exoticpet/RetrofitClient.kt	(date 1774460437539)
+@@ -8,14 +8,29 @@
+ 
+ object RetrofitClient {
+ 
+-    private const val BASE_URL = "http://10.0.2.2:8080/api/"  // 替换为实际的API地址
++    // ✅ 修复：BASE_URL 应该是基础域名
++    private const val BASE_URL = "https://dashscope.aliyuncs.com/"
++
++    // 🔑 你的 API Key
++    const val DASHSCOPE_API_KEY = "sk-53be77a68ea04447a1b74eb48aaca505"
++
++    var useOpenAICompatible = false
+ 
+     private val client = OkHttpClient.Builder()
++        .addInterceptor { chain ->
++            val original = chain.request()
++            val request = original.newBuilder()
++                .header("Authorization", "Bearer $DASHSCOPE_API_KEY")
++                .header("Content-Type", "application/json")
++                .method(original.method, original.body)
++                .build()
++            chain.proceed(request)
++        }
+         .addInterceptor(HttpLoggingInterceptor().apply {
+             level = HttpLoggingInterceptor.Level.BODY
+         })
+         .connectTimeout(30, TimeUnit.SECONDS)
+-        .readTimeout(30, TimeUnit.SECONDS)
++        .readTimeout(60, TimeUnit.SECONDS)
+         .writeTimeout(30, TimeUnit.SECONDS)
+         .build()
+ 
+Index: build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Top-level build file where you can add configuration options common to all sub-projects/modules.\r\nplugins {\r\n    id(\"com.android.application\") version \"8.4.0\" apply false\r\n    id(\"org.jetbrains.kotlin.android\") version \"1.9.23\" apply false\r\n}\r\n\r\ntasks.register(\"clean\", Delete::class) {\r\n    delete(rootProject.buildDir)\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/build.gradle.kts b/build.gradle.kts
+--- a/build.gradle.kts	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/build.gradle.kts	(date 1774460437548)
+@@ -1,6 +1,6 @@
+ // Top-level build file where you can add configuration options common to all sub-projects/modules.
+ plugins {
+-    id("com.android.application") version "8.4.0" apply false
++    id("com.android.application") version "8.13.0" apply false
+     id("org.jetbrains.kotlin.android") version "1.9.23" apply false
+ }
+ 
+Index: app/src/main/java/com/example/exoticpet/MonitorFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.exoticpet\r\n\r\nimport android.os.Bundle\r\nimport android.view.LayoutInflater\r\nimport android.view.View\r\nimport android.view.ViewGroup\r\nimport android.widget.*\r\nimport androidx.cardview.widget.CardView\r\nimport androidx.fragment.app.Fragment\r\n\r\nclass MonitorFragment : Fragment() {\r\n\r\n    private lateinit var switchMonitoring: Switch\r\n    private lateinit var tvStatus: TextView\r\n    private lateinit var tvTemperature: TextView\r\n    private lateinit var tvHumidity: TextView\r\n    private lateinit var tvActivity: TextView\r\n    private lateinit var progressBarTemp: ProgressBar\r\n    private lateinit var progressBarHumidity: ProgressBar\r\n    private lateinit var btnSettings: ImageView\r\n    private lateinit var alertCard: CardView\r\n    private lateinit var tvAlertMessage: TextView\r\n    private lateinit var btnDismissAlert: Button\r\n    private lateinit var alertCardLayout: LinearLayout\r\n\r\n    override fun onCreateView(\r\n        inflater: LayoutInflater,\r\n        container: ViewGroup?,\r\n        savedInstanceState: Bundle?\r\n    ): View? {\r\n        val view = inflater.inflate(R.layout.fragment_monitor, container, false)\r\n\r\n        initViews(view)\r\n        setupClickListeners()\r\n\r\n        return view\r\n    }\r\n\r\n    private fun initViews(view: View) {\r\n        switchMonitoring = view.findViewById(R.id.switchMonitoring)\r\n        tvStatus = view.findViewById(R.id.tvStatus)\r\n        tvTemperature = view.findViewById(R.id.tvTemperature)\r\n        tvHumidity = view.findViewById(R.id.tvHumidity)\r\n        tvActivity = view.findViewById(R.id.tvActivity)\r\n        progressBarTemp = view.findViewById(R.id.progressBarTemp)\r\n        progressBarHumidity = view.findViewById(R.id.progressBarHumidity)\r\n        btnSettings = view.findViewById(R.id.btnSettings)\r\n        alertCard = view.findViewById(R.id.alertCard)\r\n        tvAlertMessage = view.findViewById(R.id.tvAlertMessage)\r\n        btnDismissAlert = view.findViewById(R.id.btnDismissAlert)\r\n        alertCardLayout = view.findViewById(R.id.alertCardLayout)\r\n\r\n        tvTemperature.text = \"【温度数据】\"\r\n        tvHumidity.text = \"【湿度数据】\"\r\n        tvActivity.text = \"【活动状态】\"\r\n        tvAlertMessage.text = \"【此处用于输出警报信息】\"\r\n\r\n        progressBarTemp.progress = 0\r\n        progressBarHumidity.progress = 0\r\n    }\r\n\r\n    private fun setupClickListeners() {\r\n        switchMonitoring.setOnCheckedChangeListener { _, isChecked ->\r\n            if (isChecked) {\r\n                tvStatus.text = \"监控中\"\r\n                tvStatus.setTextColor(android.graphics.Color.parseColor(\"#4CAF50\"))\r\n                Toast.makeText(requireContext(), \"监控已开启\", Toast.LENGTH_SHORT).show()\r\n\r\n                tvTemperature.text = \"28°C\"\r\n                tvHumidity.text = \"55%\"\r\n                tvActivity.text = \"轻微活动\"\r\n                progressBarTemp.progress = 60\r\n                progressBarHumidity.progress = 50\r\n            } else {\r\n                tvStatus.text = \"已停止\"\r\n                tvStatus.setTextColor(android.graphics.Color.parseColor(\"#F44336\"))\r\n                Toast.makeText(requireContext(), \"监控已关闭\", Toast.LENGTH_SHORT).show()\r\n\r\n                tvTemperature.text = \"【温度数据】\"\r\n                tvHumidity.text = \"【湿度数据】\"\r\n                tvActivity.text = \"【活动状态】\"\r\n                progressBarTemp.progress = 0\r\n                progressBarHumidity.progress = 0\r\n            }\r\n        }\r\n\r\n        btnSettings.setOnClickListener {\r\n            Toast.makeText(requireContext(), \"设置界面（可配置监控参数）\", Toast.LENGTH_SHORT).show()\r\n        }\r\n\r\n        btnDismissAlert.setOnClickListener {\r\n            alertCard.visibility = View.GONE\r\n        }\r\n\r\n        alertCardLayout.setOnLongClickListener {\r\n            alertCard.visibility = View.VISIBLE\r\n            tvAlertMessage.text = \"【示例警报】温度过高，请注意\"\r\n            true\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/exoticpet/MonitorFragment.kt b/app/src/main/java/com/example/exoticpet/MonitorFragment.kt
+--- a/app/src/main/java/com/example/exoticpet/MonitorFragment.kt	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/app/src/main/java/com/example/exoticpet/MonitorFragment.kt	(date 1774460437574)
+@@ -1,101 +1,377 @@
+ package com.example.exoticpet
+ 
++import android.Manifest
++import android.content.pm.PackageManager
++import android.graphics.Bitmap
++import android.graphics.BitmapFactory
++import android.graphics.Matrix
+ import android.os.Bundle
++import android.util.Log
+ import android.view.LayoutInflater
+ import android.view.View
+ import android.view.ViewGroup
+ import android.widget.*
+-import androidx.cardview.widget.CardView
++import androidx.camera.core.*
++import androidx.camera.lifecycle.ProcessCameraProvider
++import androidx.camera.view.PreviewView
++import androidx.core.content.ContextCompat
+ import androidx.fragment.app.Fragment
++import androidx.lifecycle.lifecycleScope
++import com.example.exoticpet.viewmodel.AnalysisViewModel
++import kotlinx.coroutines.delay
++import kotlinx.coroutines.launch
++import java.io.File
++import java.text.SimpleDateFormat
++import java.util.*
++import java.util.concurrent.ExecutorService
++import java.util.concurrent.Executors
+ 
+ class MonitorFragment : Fragment() {
+ 
++    private lateinit var previewView: PreviewView
+     private lateinit var switchMonitoring: Switch
+     private lateinit var tvStatus: TextView
++    private lateinit var tvLastAnalysis: TextView
+     private lateinit var tvTemperature: TextView
+     private lateinit var tvHumidity: TextView
+     private lateinit var tvActivity: TextView
+-    private lateinit var progressBarTemp: ProgressBar
+-    private lateinit var progressBarHumidity: ProgressBar
+     private lateinit var btnSettings: ImageView
+-    private lateinit var alertCard: CardView
++    private lateinit var alertCard: LinearLayout
+     private lateinit var tvAlertMessage: TextView
+     private lateinit var btnDismissAlert: Button
+-    private lateinit var alertCardLayout: LinearLayout
++    private lateinit var spinnerInterval: Spinner
++    private lateinit var btnTakeSnapshot: Button
++
++    private var cameraProvider: ProcessCameraProvider? = null
++    private var imageCapture: ImageCapture? = null
++    private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
++    private var camera: Camera? = null
++
++    private lateinit var dbHelper: PetDatabase
++    private lateinit var analysisViewModel: AnalysisViewModel
++
++    private var isMonitoring = false
++    private var monitorJob: kotlinx.coroutines.Job? = null
++    private var intervalMinutes = 5L
++
++    private lateinit var cameraExecutor: ExecutorService
++
++    companion object {
++        private const val REQUEST_CAMERA_PERMISSION = 1001
++    }
+ 
+     override fun onCreateView(
+         inflater: LayoutInflater,
+         container: ViewGroup?,
+         savedInstanceState: Bundle?
+     ): View? {
+-        val view = inflater.inflate(R.layout.fragment_monitor, container, false)
++        val view = inflater.inflate(R.layout.fragment_camera_monitor, container, false)
+ 
+         initViews(view)
++        initData()
+         setupClickListeners()
++        checkCameraPermission()
+ 
+         return view
+     }
+ 
+     private fun initViews(view: View) {
++        previewView = view.findViewById(R.id.previewView)
+         switchMonitoring = view.findViewById(R.id.switchMonitoring)
+         tvStatus = view.findViewById(R.id.tvStatus)
++        tvLastAnalysis = view.findViewById(R.id.tvLastAnalysis)
+         tvTemperature = view.findViewById(R.id.tvTemperature)
+         tvHumidity = view.findViewById(R.id.tvHumidity)
+         tvActivity = view.findViewById(R.id.tvActivity)
+-        progressBarTemp = view.findViewById(R.id.progressBarTemp)
+-        progressBarHumidity = view.findViewById(R.id.progressBarHumidity)
+         btnSettings = view.findViewById(R.id.btnSettings)
+-        alertCard = view.findViewById(R.id.alertCard)
++        alertCard = view.findViewById(R.id.alertCardLayout)
+         tvAlertMessage = view.findViewById(R.id.tvAlertMessage)
+         btnDismissAlert = view.findViewById(R.id.btnDismissAlert)
+-        alertCardLayout = view.findViewById(R.id.alertCardLayout)
++        spinnerInterval = view.findViewById(R.id.spinnerInterval)
++        btnTakeSnapshot = view.findViewById(R.id.btnTakeSnapshot)
++
++        // 设置监控间隔选项
++        val intervals = arrayOf("1分钟", "5分钟", "10分钟", "30分钟", "1小时")
++        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, intervals)
++        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
++        spinnerInterval.adapter = adapter
++        spinnerInterval.setSelection(1) // 默认5分钟
++
++        // 初始状态
++        tvLastAnalysis.text = "暂无分析结果"
++        alertCard.visibility = View.GONE
++    }
++
++    private fun initData() {
++        dbHelper = PetDatabase(requireContext())
++        analysisViewModel = androidx.lifecycle.ViewModelProvider(requireActivity())[AnalysisViewModel::class.java]
++        cameraExecutor = Executors.newSingleThreadExecutor()
+ 
+-        tvTemperature.text = "【温度数据】"
+-        tvHumidity.text = "【湿度数据】"
+-        tvActivity.text = "【活动状态】"
+-        tvAlertMessage.text = "【此处用于输出警报信息】"
++        // 观察分析结果
++        analysisViewModel.analysisResult.observe(viewLifecycleOwner) { result ->
++            result?.let {
++                val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
++                tvLastAnalysis.text = "[$time] 评分：${it.score}分 - ${it.status}\n${it.analysis}"
+ 
+-        progressBarTemp.progress = 0
+-        progressBarHumidity.progress = 0
++                if (it.warnings.isNotEmpty() && it.warnings != "本分析结果不构成医疗诊断") {
++                    showAlert(it.warnings)
++                }
++            }
++        }
++
++        analysisViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
++            if (isLoading) {
++                tvStatus.text = "分析中..."
++                tvStatus.setTextColor(android.graphics.Color.parseColor("#FF9800"))
++            } else if (isMonitoring) {
++                tvStatus.text = "监控中"
++                tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
++            }
++        }
+     }
+ 
+     private fun setupClickListeners() {
+         switchMonitoring.setOnCheckedChangeListener { _, isChecked ->
+             if (isChecked) {
+-                tvStatus.text = "监控中"
+-                tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+-                Toast.makeText(requireContext(), "监控已开启", Toast.LENGTH_SHORT).show()
+-
+-                tvTemperature.text = "28°C"
+-                tvHumidity.text = "55%"
+-                tvActivity.text = "轻微活动"
+-                progressBarTemp.progress = 60
+-                progressBarHumidity.progress = 50
++                startMonitoring()
+             } else {
+-                tvStatus.text = "已停止"
+-                tvStatus.setTextColor(android.graphics.Color.parseColor("#F44336"))
+-                Toast.makeText(requireContext(), "监控已关闭", Toast.LENGTH_SHORT).show()
++                stopMonitoring()
++            }
++        }
+ 
+-                tvTemperature.text = "【温度数据】"
+-                tvHumidity.text = "【湿度数据】"
+-                tvActivity.text = "【活动状态】"
+-                progressBarTemp.progress = 0
+-                progressBarHumidity.progress = 0
+-            }
++        btnTakeSnapshot.setOnClickListener {
++            takeSnapshotAndAnalyze()
+         }
+ 
+         btnSettings.setOnClickListener {
+-            Toast.makeText(requireContext(), "设置界面（可配置监控参数）", Toast.LENGTH_SHORT).show()
++            showIntervalDialog()
+         }
+ 
+         btnDismissAlert.setOnClickListener {
+             alertCard.visibility = View.GONE
+         }
++    }
++
++    private fun startMonitoring() {
++        if (!hasCameraPermission()) {
++            checkCameraPermission()
++            switchMonitoring.isChecked = false
++            return
++        }
++
++        isMonitoring = true
++        val selectedPosition = spinnerInterval.selectedItemPosition
++        intervalMinutes = when (selectedPosition) {
++            0 -> 1
++            1 -> 5
++            2 -> 10
++            3 -> 30
++            else -> 60
++        }
++
++        tvStatus.text = "监控中"
++        tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
++
++        // 启动定时任务
++        monitorJob = lifecycleScope.launch {
++            while (isMonitoring) {
++                takeSnapshotAndAnalyze()
++                delay(intervalMinutes * 60 * 1000)
++            }
++        }
++
++        Toast.makeText(requireContext(), "监控已启动，间隔${intervalMinutes}分钟", Toast.LENGTH_SHORT).show()
++    }
++
++    private fun stopMonitoring() {
++        isMonitoring = false
++        monitorJob?.cancel()
++
++        tvStatus.text = "已停止"
++        tvStatus.setTextColor(android.graphics.Color.parseColor("#F44336"))
++
++        Toast.makeText(requireContext(), "监控已停止", Toast.LENGTH_SHORT).show()
++    }
++
++    private fun takeSnapshotAndAnalyze() {
++        if (!hasCameraPermission()) {
++            Toast.makeText(requireContext(), "需要相机权限", Toast.LENGTH_SHORT).show()
++            return
++        }
++
++        val imageCapture = imageCapture ?: run {
++            Toast.makeText(requireContext(), "相机未就绪", Toast.LENGTH_SHORT).show()
++            return
++        }
++
++        // 设置输出目录
++        val outputDir = File(requireContext().cacheDir, "snapshots")
++        if (!outputDir.exists()) {
++            outputDir.mkdirs()
++        }
++
++        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
++        val photoFile = File(outputDir, "snapshot_$timestamp.jpg")
++
++        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
++
++        imageCapture.takePicture(
++            outputOptions,
++            ContextCompat.getMainExecutor(requireContext()),
++            object : ImageCapture.OnImageSavedCallback {
++                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
++                    // 图片保存成功，加载并分析
++                    val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
++                    if (bitmap != null) {
++                        // 旋转图片到正确方向
++                        val rotatedBitmap = rotateBitmapIfNeeded(bitmap)
++                        analyzeImage(rotatedBitmap)
++                    } else {
++                        Toast.makeText(requireContext(), "图片加载失败", Toast.LENGTH_SHORT).show()
++                    }
++                }
++
++                override fun onError(exception: ImageCaptureException) {
++                    Log.e("MonitorFragment", "拍照失败", exception)
++                    Toast.makeText(requireContext(), "拍照失败: ${exception.message}", Toast.LENGTH_SHORT).show()
++                }
++            }
++        )
++    }
++
++    private fun analyzeImage(bitmap: Bitmap) {
++        lifecycleScope.launch {
++            try {
++                val pet = dbHelper.getPet()
++                // 压缩图片以减少上传大小
++                val compressedBitmap = compressBitmap(bitmap)
++                analysisViewModel.analyzeImage(compressedBitmap, pet)
++            } catch (e: Exception) {
++                Toast.makeText(requireContext(), "分析失败: ${e.message}", Toast.LENGTH_SHORT).show()
++            }
++        }
++    }
+ 
+-        alertCardLayout.setOnLongClickListener {
+-            alertCard.visibility = View.VISIBLE
+-            tvAlertMessage.text = "【示例警报】温度过高，请注意"
+-            true
+-        }
++    private fun compressBitmap(bitmap: Bitmap): Bitmap {
++        val maxSize = 1024 // 最大边长1024px
++        val width = bitmap.width
++        val height = bitmap.height
++
++        val scale = if (width > height) {
++            maxSize.toFloat() / width
++        } else {
++            maxSize.toFloat() / height
++        }
++
++        if (scale < 1) {
++            val newWidth = (width * scale).toInt()
++            val newHeight = (height * scale).toInt()
++            return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
++        }
++        return bitmap
++    }
++
++    private fun rotateBitmapIfNeeded(bitmap: Bitmap): Bitmap {
++        // 根据相机方向旋转（这里简化处理）
++        // 实际应用中需要根据相机传感器方向进行旋转
++        return bitmap
++    }
++
++    private fun showAlert(message: String) {
++        tvAlertMessage.text = message
++        alertCard.visibility = View.VISIBLE
++
++        // 5秒后自动隐藏
++        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
++            if (alertCard.visibility == View.VISIBLE) {
++                alertCard.visibility = View.GONE
++            }
++        }, 5000)
+     }
++
++    private fun showIntervalDialog() {
++        val intervals = arrayOf("1分钟", "5分钟", "10分钟", "30分钟", "1小时")
++        android.app.AlertDialog.Builder(requireContext())
++            .setTitle("设置监控间隔")
++            .setItems(intervals) { _, which ->
++                spinnerInterval.setSelection(which)
++                if (isMonitoring) {
++                    Toast.makeText(requireContext(), "监控间隔已更改，将下次生效", Toast.LENGTH_SHORT).show()
++                }
++            }
++            .show()
++    }
++
++    private fun checkCameraPermission() {
++        if (hasCameraPermission()) {
++            startCamera()
++        } else {
++            requestPermissions(
++                arrayOf(Manifest.permission.CAMERA),
++                REQUEST_CAMERA_PERMISSION
++            )
++        }
++    }
++
++    private fun hasCameraPermission(): Boolean {
++        return ContextCompat.checkSelfPermission(
++            requireContext(),
++            Manifest.permission.CAMERA
++        ) == PackageManager.PERMISSION_GRANTED
++    }
++
++    private fun startCamera() {
++        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
++
++        cameraProviderFuture.addListener({
++            cameraProvider = cameraProviderFuture.get()
++
++            // 预览
++            val preview = Preview.Builder().build()
++            preview.setSurfaceProvider(previewView.surfaceProvider)
++
++            // 图像捕获
++            imageCapture = ImageCapture.Builder()
++                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
++                .build()
++
++            // 选择相机
++            cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
++
++            try {
++                cameraProvider?.unbindAll()
++                camera = cameraProvider?.bindToLifecycle(
++                    this,
++                    cameraSelector,
++                    preview,
++                    imageCapture
++                )
++            } catch (exc: Exception) {
++                Log.e("MonitorFragment", "相机启动失败", exc)
++                Toast.makeText(requireContext(), "相机启动失败: ${exc.message}", Toast.LENGTH_SHORT).show()
++            }
++        }, ContextCompat.getMainExecutor(requireContext()))
++    }
++
++    override fun onRequestPermissionsResult(
++        requestCode: Int,
++        permissions: Array<out String>,
++        grantResults: IntArray
++    ) {
++        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
++        if (requestCode == REQUEST_CAMERA_PERMISSION) {
++            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
++                startCamera()
++            } else {
++                Toast.makeText(requireContext(), "需要相机权限才能使用监控功能", Toast.LENGTH_LONG).show()
++            }
++        }
++    }
++
++    override fun onDestroy() {
++        super.onDestroy()
++        cameraProvider?.unbindAll()
++        cameraExecutor.shutdown()
++        monitorJob?.cancel()
++    }
+ }
+\ No newline at end of file
+Index: app/build.gradle.kts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>plugins {\r\n    id(\"com.android.application\")\r\n    id(\"org.jetbrains.kotlin.android\")\r\n}\r\n\r\nandroid {\r\n    namespace = \"com.example.exoticpet\"\r\n    compileSdk = 34\r\n\r\n    defaultConfig {\r\n        applicationId = \"com.example.exoticpet\"\r\n        minSdk = 24\r\n        targetSdk = 34\r\n        versionCode = 1\r\n        versionName = \"1.0\"\r\n\r\n        testInstrumentationRunner = \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            isMinifyEnabled = false\r\n            proguardFiles(\r\n                getDefaultProguardFile(\"proguard-android-optimize.txt\"),\r\n                \"proguard-rules.pro\"\r\n            )\r\n        }\r\n    }\r\n    compileOptions {\r\n        sourceCompatibility = JavaVersion.VERSION_21\r\n        targetCompatibility = JavaVersion.VERSION_21\r\n    }\r\n    kotlinOptions {\r\n        jvmTarget = \"21\"\r\n    }\r\n}\r\n\r\ndependencies {\r\n    implementation(\"androidx.core:core-ktx:1.12.0\")\r\n    implementation(\"androidx.appcompat:appcompat:1.6.1\")\r\n    implementation(\"com.google.android.material:material:1.11.0\")\r\n    implementation(\"androidx.constraintlayout:constraintlayout:2.1.4\")\r\n    implementation(\"androidx.recyclerview:recyclerview:1.3.2\")\r\n    implementation(\"androidx.cardview:cardview:1.0.0\")\r\n    implementation(\"com.github.PhilJay:MPAndroidChart:v3.1.0\")\r\n\r\n    testImplementation(\"junit:junit:4.13.2\")\r\n    androidTestImplementation(\"androidx.test.ext:junit:1.1.5\")\r\n    androidTestImplementation(\"androidx.test.espresso:espresso-core:3.5.1\")\r\n    // Retrofit for API calls\r\n    implementation(\"com.squareup.retrofit2:retrofit:2.9.0\")\r\n    implementation(\"com.squareup.retrofit2:converter-gson:2.9.0\")\r\n    implementation(\"com.squareup.okhttp3:logging-interceptor:4.11.0\")\r\n\r\n    // ViewModel\r\n    implementation(\"androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2\")\r\n    implementation(\"androidx.lifecycle:lifecycle-livedata-ktx:2.6.2\")\r\n\r\n    // Coroutines\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3\")\r\n    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3\")\r\n\r\n    // Image loading (可选)\r\n    implementation(\"io.coil-kt:coil:2.4.0\")\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+--- a/app/build.gradle.kts	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/app/build.gradle.kts	(date 1774460437586)
+@@ -62,4 +62,18 @@
+ 
+     // Image loading (可选)
+     implementation("io.coil-kt:coil:2.4.0")
++
++    // Gson (如果还没添加)
++    implementation("com.google.code.gson:gson:2.10.1")
++
++    // CameraX
++    val cameraxVersion = "1.4.0"
++    implementation("androidx.camera:camera-core:${cameraxVersion}")
++    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
++    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
++    implementation("androidx.camera:camera-view:${cameraxVersion}")
++
++    // WorkManager for background tasks
++    implementation("androidx.work:work-runtime-ktx:2.9.0")
++
+ }
+\ No newline at end of file
+Index: .idea/compiler.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+new file mode 100644
+--- /dev/null	(date 1774460437614)
++++ b/.idea/compiler.xml	(date 1774460437614)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="CompilerConfiguration">
++    <bytecodeTargetLevel target="21" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/deviceManager.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/deviceManager.xml b/.idea/deviceManager.xml
+new file mode 100644
+--- /dev/null	(date 1774460437582)
++++ b/.idea/deviceManager.xml	(date 1774460437582)
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="DeviceTable">
++    <option name="columnSorters">
++      <list>
++        <ColumnSorterState>
++          <option name="column" value="Name" />
++          <option name="order" value="ASCENDING" />
++        </ColumnSorterState>
++      </list>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: app/src/main/java/com/example/exoticpet/AnalysisFragment.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>//package com.example.exoticpet\r\n//\r\n//import android.net.Uri\r\n//import android.os.Bundle\r\n//import android.view.LayoutInflater\r\n//import android.view.View\r\n//import android.view.ViewGroup\r\n//import android.widget.Button\r\n//import android.widget.ImageView\r\n//import android.widget.ProgressBar\r\n//import android.widget.Toast\r\n//import androidx.activity.result.contract.ActivityResultContracts\r\n//import androidx.fragment.app.Fragment\r\n//import androidx.cardview.widget.CardView\r\n//\r\n//class AnalysisFragment : Fragment() {\r\n//\r\n//    private lateinit var imageView: ImageView\r\n//    private lateinit var btnTakePhoto: Button\r\n//    private lateinit var btnChooseFromGallery: Button\r\n//    private lateinit var btnAnalyze: Button\r\n//    private lateinit var progressBar: ProgressBar\r\n//    private lateinit var resultCard: CardView\r\n//\r\n//    private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->\r\n//        bitmap?.let {\r\n//            imageView.setImageBitmap(it)\r\n//            btnAnalyze.isEnabled = true\r\n//            Toast.makeText(requireContext(), \"照片已选择\", Toast.LENGTH_SHORT).show()\r\n//        }\r\n//    }\r\n//\r\n//    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->\r\n//        uri?.let {\r\n//            imageView.setImageURI(uri)\r\n//            btnAnalyze.isEnabled = true\r\n//            Toast.makeText(requireContext(), \"图片已选择\", Toast.LENGTH_SHORT).show()\r\n//        }\r\n//    }\r\n//\r\n//    override fun onCreateView(\r\n//        inflater: LayoutInflater,\r\n//        container: ViewGroup?,\r\n//        savedInstanceState: Bundle?\r\n//    ): View? {\r\n//        val view = inflater.inflate(R.layout.fragment_analysis, container, false)\r\n//\r\n//        initViews(view)\r\n//        setupClickListeners()\r\n//\r\n//        return view\r\n//    }\r\n//\r\n//    private fun initViews(view: View) {\r\n//        imageView = view.findViewById(R.id.imageView)\r\n//        btnTakePhoto = view.findViewById(R.id.btnTakePhoto)\r\n//        btnChooseFromGallery = view.findViewById(R.id.btnChooseFromGallery)\r\n//        btnAnalyze = view.findViewById(R.id.btnAnalyze)\r\n//        progressBar = view.findViewById(R.id.progressBar)\r\n//        resultCard = view.findViewById(R.id.resultCard)\r\n//\r\n//        btnAnalyze.isEnabled = false\r\n//        resultCard.visibility = View.GONE\r\n//    }\r\n//\r\n//    private fun setupClickListeners() {\r\n//        btnTakePhoto.setOnClickListener {\r\n//            takePhotoLauncher.launch(null)\r\n//        }\r\n//\r\n//        btnChooseFromGallery.setOnClickListener {\r\n//            pickImageLauncher.launch(\"image/*\")\r\n//        }\r\n//\r\n//        btnAnalyze.setOnClickListener {\r\n//            progressBar.visibility = View.VISIBLE\r\n//            btnAnalyze.isEnabled = false\r\n//\r\n//            view?.postDelayed({\r\n//                progressBar.visibility = View.GONE\r\n//                btnAnalyze.isEnabled = true\r\n//                resultCard.visibility = View.VISIBLE\r\n//                Toast.makeText(requireContext(), \"分析完成，请查看结果区域\", Toast.LENGTH_SHORT).show()\r\n//            }, 2000)\r\n//        }\r\n//    }\r\n//}\r\n\r\npackage com.example.exoticpet\r\n\r\nimport android.graphics.Bitmap\r\nimport android.os.Bundle\r\nimport android.view.LayoutInflater\r\nimport android.view.View\r\nimport android.view.ViewGroup\r\nimport android.widget.Button\r\nimport android.widget.ImageView\r\nimport android.widget.ProgressBar\r\nimport android.widget.TextView\r\nimport android.widget.Toast\r\nimport androidx.activity.result.contract.ActivityResultContracts\r\nimport androidx.cardview.widget.CardView\r\nimport androidx.fragment.app.Fragment\r\nimport androidx.lifecycle.ViewModelProvider\r\nimport com.example.exoticpet.viewmodel.AnalysisViewModel\r\nimport android.widget.LinearLayout\r\nimport com.example.exoticpet.models.Pet\r\n\r\nclass AnalysisFragment : Fragment() {\r\n\r\n    private lateinit var imageView: ImageView\r\n    private lateinit var btnTakePhoto: Button\r\n    private lateinit var btnChooseFromGallery: Button\r\n    private lateinit var btnAnalyze: Button\r\n    private lateinit var progressBar: ProgressBar\r\n    private lateinit var resultCard: CardView\r\n    private lateinit var tvHealthStatus: TextView\r\n    private lateinit var tvScore: TextView\r\n    private lateinit var tvAnalysis: TextView\r\n    private lateinit var tvSuggestion: TextView\r\n    private lateinit var tvWarning: TextView\r\n    private lateinit var tabHealth: LinearLayout\r\n    private lateinit var tabBehavior: LinearLayout\r\n    private lateinit var tabDiet: LinearLayout\r\n\r\n    private lateinit var viewModel: AnalysisViewModel\r\n    private lateinit var dbHelper: PetDatabase\r\n    private var currentImageBitmap: Bitmap? = null\r\n\r\n    private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->\r\n        bitmap?.let {\r\n            currentImageBitmap = it\r\n            imageView.setImageBitmap(it)\r\n            btnAnalyze.isEnabled = true\r\n            viewModel.clearResult()\r\n        }\r\n    }\r\n\r\n    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->\r\n        uri?.let {\r\n            imageView.setImageURI(uri)\r\n            // 将URI转换为Bitmap\r\n            try {\r\n                val inputStream = requireContext().contentResolver.openInputStream(uri)\r\n                val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)\r\n                currentImageBitmap = bitmap\r\n                btnAnalyze.isEnabled = true\r\n                viewModel.clearResult()\r\n            } catch (e: Exception) {\r\n                Toast.makeText(requireContext(), \"图片加载失败\", Toast.LENGTH_SHORT).show()\r\n            }\r\n        }\r\n    }\r\n\r\n    override fun onCreateView(\r\n        inflater: LayoutInflater,\r\n        container: ViewGroup?,\r\n        savedInstanceState: Bundle?\r\n    ): View? {\r\n        val view = inflater.inflate(R.layout.fragment_analysis, container, false)\r\n\r\n        dbHelper = PetDatabase(requireContext())\r\n        viewModel = ViewModelProvider(this)[AnalysisViewModel::class.java]\r\n\r\n        initViews(view)\r\n        setupClickListeners()\r\n        observeViewModel()\r\n\r\n        return view\r\n    }\r\n\r\n    private fun initViews(view: View) {\r\n        imageView = view.findViewById(R.id.imageView)\r\n        btnTakePhoto = view.findViewById(R.id.btnTakePhoto)\r\n        btnChooseFromGallery = view.findViewById(R.id.btnChooseFromGallery)\r\n        btnAnalyze = view.findViewById(R.id.btnAnalyze)\r\n        progressBar = view.findViewById(R.id.progressBar)\r\n        resultCard = view.findViewById(R.id.resultCard)\r\n        tvHealthStatus = view.findViewById(R.id.tvHealthStatus)\r\n        tvScore = view.findViewById(R.id.tvScore)\r\n        tvAnalysis = view.findViewById(R.id.tvAnalysis)\r\n        tvSuggestion = view.findViewById(R.id.tvSuggestion)\r\n        tvWarning = view.findViewById(R.id.tvWarning)\r\n        tabHealth = view.findViewById(R.id.tabHealth)\r\n        tabBehavior = view.findViewById(R.id.tabBehavior)\r\n        tabDiet = view.findViewById(R.id.tabDiet)\r\n\r\n        btnAnalyze.isEnabled = false\r\n        resultCard.visibility = View.GONE\r\n    }\r\n\r\n    private fun setupClickListeners() {\r\n        btnTakePhoto.setOnClickListener {\r\n            takePhotoLauncher.launch(null)\r\n        }\r\n\r\n        btnChooseFromGallery.setOnClickListener {\r\n            pickImageLauncher.launch(\"image/*\")\r\n        }\r\n\r\n        btnAnalyze.setOnClickListener {\r\n            if (currentImageBitmap != null) {\r\n                val pet = dbHelper.getPet()\r\n                viewModel.analyzeImage(currentImageBitmap!!, pet)\r\n            }\r\n        }\r\n\r\n        tabHealth.setOnClickListener {\r\n            updateSelectedTab(tabHealth)\r\n            viewModel.setAnalysisType(\"health\")\r\n        }\r\n\r\n        tabBehavior.setOnClickListener {\r\n            updateSelectedTab(tabBehavior)\r\n            viewModel.setAnalysisType(\"behavior\")\r\n        }\r\n\r\n        tabDiet.setOnClickListener {\r\n            updateSelectedTab(tabDiet)\r\n            viewModel.setAnalysisType(\"diet\")\r\n        }\r\n    }\r\n\r\n    private fun updateSelectedTab(selectedTab: LinearLayout) {\r\n        val defaultBg = android.content.res.ColorStateList.valueOf(\r\n            android.graphics.Color.parseColor(\"#F5F5F5\")\r\n        )\r\n        val selectedBg = android.content.res.ColorStateList.valueOf(\r\n            android.graphics.Color.parseColor(\"#FF9800\")\r\n        )\r\n\r\n        tabHealth.backgroundTintList = defaultBg\r\n        tabBehavior.backgroundTintList = defaultBg\r\n        tabDiet.backgroundTintList = defaultBg\r\n\r\n        selectedTab.backgroundTintList = selectedBg\r\n    }\r\n\r\n    private fun observeViewModel() {\r\n        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->\r\n            if (isLoading) {\r\n                progressBar.visibility = View.VISIBLE\r\n                btnAnalyze.isEnabled = false\r\n                resultCard.visibility = View.GONE\r\n            } else {\r\n                progressBar.visibility = View.GONE\r\n                btnAnalyze.isEnabled = currentImageBitmap != null\r\n            }\r\n        }\r\n\r\n        viewModel.analysisResult.observe(viewLifecycleOwner) { result ->\r\n            result?.let {\r\n                resultCard.visibility = View.VISIBLE\r\n                tvHealthStatus.text = \"健康状态：${it.status}\"\r\n                tvScore.text = \"健康评分：${it.score} 分\"\r\n                tvAnalysis.text = \"分析结果：${it.analysis}\"\r\n                tvSuggestion.text = \"饲养建议：${it.suggestions}\"\r\n                tvWarning.text = \"注意事项：${it.warnings}\"\r\n\r\n                // 根据评分设置颜色\r\n                val statusColor = when {\r\n                    it.score >= 75 -> android.graphics.Color.parseColor(\"#4CAF50\")\r\n                    it.score >= 60 -> android.graphics.Color.parseColor(\"#FF9800\")\r\n                    else -> android.graphics.Color.parseColor(\"#F44336\")\r\n                }\r\n                tvHealthStatus.setTextColor(statusColor)\r\n            }\r\n        }\r\n\r\n        viewModel.error.observe(viewLifecycleOwner) { errorMsg ->\r\n            errorMsg?.let {\r\n                Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()\r\n            }\r\n        }\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/exoticpet/AnalysisFragment.kt b/app/src/main/java/com/example/exoticpet/AnalysisFragment.kt
+--- a/app/src/main/java/com/example/exoticpet/AnalysisFragment.kt	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/app/src/main/java/com/example/exoticpet/AnalysisFragment.kt	(date 1774460437600)
+@@ -1,109 +1,25 @@
+-//package com.example.exoticpet
+-//
+-//import android.net.Uri
+-//import android.os.Bundle
+-//import android.view.LayoutInflater
+-//import android.view.View
+-//import android.view.ViewGroup
+-//import android.widget.Button
+-//import android.widget.ImageView
+-//import android.widget.ProgressBar
+-//import android.widget.Toast
+-//import androidx.activity.result.contract.ActivityResultContracts
+-//import androidx.fragment.app.Fragment
+-//import androidx.cardview.widget.CardView
+-//
+-//class AnalysisFragment : Fragment() {
+-//
+-//    private lateinit var imageView: ImageView
+-//    private lateinit var btnTakePhoto: Button
+-//    private lateinit var btnChooseFromGallery: Button
+-//    private lateinit var btnAnalyze: Button
+-//    private lateinit var progressBar: ProgressBar
+-//    private lateinit var resultCard: CardView
+-//
+-//    private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+-//        bitmap?.let {
+-//            imageView.setImageBitmap(it)
+-//            btnAnalyze.isEnabled = true
+-//            Toast.makeText(requireContext(), "照片已选择", Toast.LENGTH_SHORT).show()
+-//        }
+-//    }
+-//
+-//    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+-//        uri?.let {
+-//            imageView.setImageURI(uri)
+-//            btnAnalyze.isEnabled = true
+-//            Toast.makeText(requireContext(), "图片已选择", Toast.LENGTH_SHORT).show()
+-//        }
+-//    }
+-//
+-//    override fun onCreateView(
+-//        inflater: LayoutInflater,
+-//        container: ViewGroup?,
+-//        savedInstanceState: Bundle?
+-//    ): View? {
+-//        val view = inflater.inflate(R.layout.fragment_analysis, container, false)
+-//
+-//        initViews(view)
+-//        setupClickListeners()
+-//
+-//        return view
+-//    }
+-//
+-//    private fun initViews(view: View) {
+-//        imageView = view.findViewById(R.id.imageView)
+-//        btnTakePhoto = view.findViewById(R.id.btnTakePhoto)
+-//        btnChooseFromGallery = view.findViewById(R.id.btnChooseFromGallery)
+-//        btnAnalyze = view.findViewById(R.id.btnAnalyze)
+-//        progressBar = view.findViewById(R.id.progressBar)
+-//        resultCard = view.findViewById(R.id.resultCard)
+-//
+-//        btnAnalyze.isEnabled = false
+-//        resultCard.visibility = View.GONE
+-//    }
+-//
+-//    private fun setupClickListeners() {
+-//        btnTakePhoto.setOnClickListener {
+-//            takePhotoLauncher.launch(null)
+-//        }
+-//
+-//        btnChooseFromGallery.setOnClickListener {
+-//            pickImageLauncher.launch("image/*")
+-//        }
+-//
+-//        btnAnalyze.setOnClickListener {
+-//            progressBar.visibility = View.VISIBLE
+-//            btnAnalyze.isEnabled = false
+-//
+-//            view?.postDelayed({
+-//                progressBar.visibility = View.GONE
+-//                btnAnalyze.isEnabled = true
+-//                resultCard.visibility = View.VISIBLE
+-//                Toast.makeText(requireContext(), "分析完成，请查看结果区域", Toast.LENGTH_SHORT).show()
+-//            }, 2000)
+-//        }
+-//    }
+-//}
+-
+ package com.example.exoticpet
+ 
++import android.Manifest
++import android.content.pm.PackageManager
+ import android.graphics.Bitmap
++import android.os.Build
+ import android.os.Bundle
+ import android.view.LayoutInflater
+ import android.view.View
+ import android.view.ViewGroup
+ import android.widget.Button
+ import android.widget.ImageView
++import android.widget.LinearLayout
+ import android.widget.ProgressBar
+ import android.widget.TextView
+ import android.widget.Toast
+ import androidx.activity.result.contract.ActivityResultContracts
+ import androidx.cardview.widget.CardView
++import androidx.core.content.ContextCompat
+ import androidx.fragment.app.Fragment
+ import androidx.lifecycle.ViewModelProvider
+ import com.example.exoticpet.viewmodel.AnalysisViewModel
+-import android.widget.LinearLayout
+ import com.example.exoticpet.models.Pet
+ 
+ class AnalysisFragment : Fragment() {
+@@ -127,6 +43,19 @@
+     private lateinit var dbHelper: PetDatabase
+     private var currentImageBitmap: Bitmap? = null
+ 
++    // 权限请求启动器
++    private val requestPermissionLauncher = registerForActivityResult(
++        ActivityResultContracts.RequestMultiplePermissions()
++    ) { permissions ->
++        val allGranted = permissions.values.all { it }
++        if (allGranted) {
++            // 权限都允许了，打开相册
++            openGallery()
++        } else {
++            Toast.makeText(requireContext(), "需要存储权限才能选择图片", Toast.LENGTH_LONG).show()
++        }
++    }
++
+     private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+         bitmap?.let {
+             currentImageBitmap = it
+@@ -139,7 +68,6 @@
+     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+         uri?.let {
+             imageView.setImageURI(uri)
+-            // 将URI转换为Bitmap
+             try {
+                 val inputStream = requireContext().contentResolver.openInputStream(uri)
+                 val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+@@ -147,7 +75,7 @@
+                 btnAnalyze.isEnabled = true
+                 viewModel.clearResult()
+             } catch (e: Exception) {
+-                Toast.makeText(requireContext(), "图片加载失败", Toast.LENGTH_SHORT).show()
++                Toast.makeText(requireContext(), "图片加载失败: ${e.message}", Toast.LENGTH_SHORT).show()
+             }
+         }
+     }
+@@ -159,12 +87,17 @@
+     ): View? {
+         val view = inflater.inflate(R.layout.fragment_analysis, container, false)
+ 
+-        dbHelper = PetDatabase(requireContext())
+-        viewModel = ViewModelProvider(this)[AnalysisViewModel::class.java]
++        try {
++            dbHelper = PetDatabase(requireContext())
++            viewModel = ViewModelProvider(this)[AnalysisViewModel::class.java]
+ 
+-        initViews(view)
+-        setupClickListeners()
+-        observeViewModel()
++            initViews(view)
++            setupClickListeners()
++            observeViewModel()
++        } catch (e: Exception) {
++            e.printStackTrace()
++            Toast.makeText(requireContext(), "初始化失败: ${e.message}", Toast.LENGTH_SHORT).show()
++        }
+ 
+         return view
+     }
+@@ -191,17 +124,25 @@
+ 
+     private fun setupClickListeners() {
+         btnTakePhoto.setOnClickListener {
+-            takePhotoLauncher.launch(null)
++            // 拍照需要相机权限
++            checkCameraPermission()
+         }
+ 
+         btnChooseFromGallery.setOnClickListener {
+-            pickImageLauncher.launch("image/*")
++            // 选择图片需要存储权限
++            checkStoragePermission()
+         }
+ 
+         btnAnalyze.setOnClickListener {
+             if (currentImageBitmap != null) {
+-                val pet = dbHelper.getPet()
+-                viewModel.analyzeImage(currentImageBitmap!!, pet)
++                try {
++                    val pet = dbHelper.getPet()
++                    viewModel.analyzeImage(currentImageBitmap!!, pet)
++                } catch (e: Exception) {
++                    Toast.makeText(requireContext(), "获取宠物信息失败: ${e.message}", Toast.LENGTH_SHORT).show()
++                }
++            } else {
++                Toast.makeText(requireContext(), "请先选择图片", Toast.LENGTH_SHORT).show()
+             }
+         }
+ 
+@@ -221,6 +162,61 @@
+         }
+     }
+ 
++    // 检查存储权限
++    private fun checkStoragePermission() {
++        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
++            // Android 13+ 使用新的图片权限
++            arrayOf(
++                Manifest.permission.READ_MEDIA_IMAGES
++            )
++        } else {
++            // Android 12 及以下
++            arrayOf(
++                Manifest.permission.READ_EXTERNAL_STORAGE
++            )
++        }
++
++        val allGranted = permissions.all {
++            ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
++        }
++
++        if (allGranted) {
++            openGallery()
++        } else {
++            requestPermissionLauncher.launch(permissions)
++        }
++    }
++
++    // 检查相机权限
++    private fun checkCameraPermission() {
++        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
++            arrayOf(
++                Manifest.permission.CAMERA,
++                Manifest.permission.READ_MEDIA_IMAGES
++            )
++        } else {
++            arrayOf(
++                Manifest.permission.CAMERA,
++                Manifest.permission.READ_EXTERNAL_STORAGE
++            )
++        }
++
++        val allGranted = permissions.all {
++            ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
++        }
++
++        if (allGranted) {
++            takePhotoLauncher.launch(null)
++        } else {
++            requestPermissionLauncher.launch(permissions)
++        }
++    }
++
++    // 打开相册
++    private fun openGallery() {
++        pickImageLauncher.launch("image/*")
++    }
++
+     private fun updateSelectedTab(selectedTab: LinearLayout) {
+         val defaultBg = android.content.res.ColorStateList.valueOf(
+             android.graphics.Color.parseColor("#F5F5F5")
+@@ -257,7 +253,6 @@
+                 tvSuggestion.text = "饲养建议：${it.suggestions}"
+                 tvWarning.text = "注意事项：${it.warnings}"
+ 
+-                // 根据评分设置颜色
+                 val statusColor = when {
+                     it.score >= 75 -> android.graphics.Color.parseColor("#4CAF50")
+                     it.score >= 60 -> android.graphics.Color.parseColor("#FF9800")
+Index: .idea/migrations.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/migrations.xml b/.idea/migrations.xml
+new file mode 100644
+--- /dev/null	(date 1774460095439)
++++ b/.idea/migrations.xml	(date 1774460095439)
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectMigrations">
++    <option name="MigrateToGradleLocalJavaHome">
++      <set>
++        <option value="$PROJECT_DIR$" />
++      </set>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: gradle/wrapper/gradle-wrapper.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>distributionBase=GRADLE_USER_HOME\r\ndistributionPath=wrapper/dists\r\ndistributionUrl=https\\://mirrors.cloud.tencent.com/gradle/gradle-8.6-all.zip\r\nzipStoreBase=GRADLE_USER_HOME\r\nzipStorePath=wrapper/dists
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>ISO-8859-1
+===================================================================
+diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+--- a/gradle/wrapper/gradle-wrapper.properties	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/gradle/wrapper/gradle-wrapper.properties	(date 1774460437629)
+@@ -1,5 +1,5 @@
+ distributionBase=GRADLE_USER_HOME
+ distributionPath=wrapper/dists
+-distributionUrl=https\://mirrors.cloud.tencent.com/gradle/gradle-8.6-all.zip
++distributionUrl=https\://mirrors.cloud.tencent.com/gradle/gradle-8.13-all.zip
+ zipStoreBase=GRADLE_USER_HOME
+ zipStorePath=wrapper/dists
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ExternalStorageConfigurationManager\" enabled=\"true\" />\r\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_21\" project-jdk-name=\"jbr-21\" project-jdk-type=\"JavaSDK\" />\r\n  <component name=\"ProjectType\">\r\n    <option name=\"id\" value=\"Android\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/.idea/misc.xml	(date 1774460437637)
+@@ -1,7 +1,7 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ExternalStorageConfigurationManager" enabled="true" />
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" project-jdk-name="jbr-21" project-jdk-type="JavaSDK" />
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" default="true" project-jdk-name="jbr-21" project-jdk-type="JavaSDK" />
+   <component name="ProjectType">
+     <option name="id" value="Android" />
+   </component>
+Index: app/src/main/java/com/example/exoticpet/AnalysisViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.exoticpet.viewmodel\r\n\r\nimport android.graphics.Bitmap\r\nimport androidx.lifecycle.LiveData\r\nimport androidx.lifecycle.MutableLiveData\r\nimport androidx.lifecycle.ViewModel\r\nimport androidx.lifecycle.viewModelScope\r\nimport com.example.exoticpet.api.AnalysisResult\r\nimport com.example.exoticpet.models.Pet\r\nimport com.example.exoticpet.repository.AnalysisRepository\r\nimport kotlinx.coroutines.launch\r\n\r\nclass AnalysisViewModel : ViewModel() {\r\n\r\n    private val repository = AnalysisRepository()\r\n\r\n    // 分析结果\r\n    private val _analysisResult = MutableLiveData<AnalysisResult?>()\r\n    val analysisResult: LiveData<AnalysisResult?> = _analysisResult\r\n\r\n    // 加载状态\r\n    private val _isLoading = MutableLiveData(false)\r\n    val isLoading: LiveData<Boolean> = _isLoading\r\n\r\n    // 错误信息\r\n    private val _error = MutableLiveData<String?>()\r\n    val error: LiveData<String?> = _error\r\n\r\n    // 分析类型\r\n    private val _analysisType = MutableLiveData(\"health\")\r\n    val analysisType: LiveData<String> = _analysisType\r\n\r\n    fun setAnalysisType(type: String) {\r\n        _analysisType.value = type\r\n    }\r\n\r\n    // 分析图片\r\n    fun analyzeImage(bitmap: Bitmap, pet: Pet) {\r\n        viewModelScope.launch {\r\n            _isLoading.value = true\r\n            _error.value = null\r\n\r\n            try {\r\n                val result = repository.analyzeImage(bitmap, _analysisType.value!!, pet)\r\n\r\n                result.onSuccess { analysisResult ->\r\n                    _analysisResult.value = analysisResult\r\n                    // 保存到数据库（可选）\r\n                    saveAnalysisToDatabase(analysisResult)\r\n                }.onFailure { exception ->\r\n                    _error.value = \"分析失败: ${exception.message}\"\r\n                }\r\n            } finally {\r\n                _isLoading.value = false\r\n            }\r\n        }\r\n    }\r\n\r\n    // 保存分析结果到数据库（可选）\r\n    private fun saveAnalysisToDatabase(result: AnalysisResult) {\r\n        // TODO: 实现数据库保存\r\n    }\r\n\r\n    // 清除结果\r\n    fun clearResult() {\r\n        _analysisResult.value = null\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/exoticpet/AnalysisViewModel.kt b/app/src/main/java/com/example/exoticpet/AnalysisViewModel.kt
+--- a/app/src/main/java/com/example/exoticpet/AnalysisViewModel.kt	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/app/src/main/java/com/example/exoticpet/AnalysisViewModel.kt	(date 1774460437645)
+@@ -14,19 +14,15 @@
+ 
+     private val repository = AnalysisRepository()
+ 
+-    // 分析结果
+     private val _analysisResult = MutableLiveData<AnalysisResult?>()
+     val analysisResult: LiveData<AnalysisResult?> = _analysisResult
+ 
+-    // 加载状态
+     private val _isLoading = MutableLiveData(false)
+     val isLoading: LiveData<Boolean> = _isLoading
+ 
+-    // 错误信息
+     private val _error = MutableLiveData<String?>()
+     val error: LiveData<String?> = _error
+ 
+-    // 分析类型
+     private val _analysisType = MutableLiveData("health")
+     val analysisType: LiveData<String> = _analysisType
+ 
+@@ -34,34 +30,29 @@
+         _analysisType.value = type
+     }
+ 
+-    // 分析图片
+     fun analyzeImage(bitmap: Bitmap, pet: Pet) {
+         viewModelScope.launch {
+-            _isLoading.value = true
+-            _error.value = null
++            try {
++                _isLoading.value = true
++                _error.value = null
+ 
+-            try {
+                 val result = repository.analyzeImage(bitmap, _analysisType.value!!, pet)
+ 
+                 result.onSuccess { analysisResult ->
+                     _analysisResult.value = analysisResult
+-                    // 保存到数据库（可选）
+-                    saveAnalysisToDatabase(analysisResult)
+                 }.onFailure { exception ->
+                     _error.value = "分析失败: ${exception.message}"
++                    exception.printStackTrace()
+                 }
++            } catch (e: Exception) {
++                _error.value = "异常: ${e.message}"
++                e.printStackTrace()
+             } finally {
+                 _isLoading.value = false
+             }
+         }
+     }
+ 
+-    // 保存分析结果到数据库（可选）
+-    private fun saveAnalysisToDatabase(result: AnalysisResult) {
+-        // TODO: 实现数据库保存
+-    }
+-
+-    // 清除结果
+     fun clearResult() {
+         _analysisResult.value = null
+     }
+Index: app/src/main/java/com/example/exoticpet/AnalysisRepository.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.exoticpet.repository\r\n\r\nimport android.graphics.Bitmap\r\nimport com.example.exoticpet.api.AnalysisResult\r\nimport com.example.exoticpet.api.RetrofitClient\r\nimport com.example.exoticpet.models.Pet\r\nimport kotlinx.coroutines.Dispatchers\r\nimport kotlinx.coroutines.withContext\r\nimport okhttp3.MediaType.Companion.toMediaTypeOrNull\r\nimport okhttp3.MultipartBody\r\nimport okhttp3.RequestBody.Companion.asRequestBody\r\nimport okhttp3.RequestBody.Companion.toRequestBody\r\nimport java.io.ByteArrayOutputStream\r\nimport java.io.File\r\nimport java.io.FileOutputStream\r\n\r\nclass AnalysisRepository {\r\n\r\n    private val api = RetrofitClient.instance\r\n\r\n    // 分析图片\r\n    suspend fun analyzeImage(\r\n        bitmap: Bitmap,\r\n        type: String,\r\n        pet: Pet\r\n    ): Result<AnalysisResult> = withContext(Dispatchers.IO) {\r\n        try {\r\n            // 将Bitmap转换为文件\r\n            val file = bitmapToFile(bitmap)\r\n\r\n            // 创建MultipartBody.Part\r\n            val requestFile = file.asRequestBody(\"image/*\".toMediaTypeOrNull())\r\n            val imagePart = MultipartBody.Part.createFormData(\"image\", file.name, requestFile)\r\n\r\n            // 创建petInfo\r\n            val petInfo = \"\"\"\r\n                {\r\n                    \"name\": \"${pet.name}\",\r\n                    \"species\": \"${pet.species}\",\r\n                    \"age\": \"${pet.birthDate}\",\r\n                    \"weight\": ${pet.weight},\r\n                    \"length\": ${pet.length}\r\n                }\r\n            \"\"\".trimIndent()\r\n\r\n            val typeBody = type.toRequestBody(\"text/plain\".toMediaTypeOrNull())\r\n            val petInfoBody = petInfo.toRequestBody(\"text/plain\".toMediaTypeOrNull())\r\n\r\n            // 调用API\r\n            val response = api.analyzePetImage(imagePart, type, petInfo)\r\n\r\n            if (response.isSuccessful) {\r\n                Result.success(response.body()!!)\r\n            } else {\r\n                Result.failure(Exception(\"API调用失败: ${response.code()}\"))\r\n            }\r\n        } catch (e: Exception) {\r\n            Result.failure(e)\r\n        }\r\n    }\r\n\r\n    // Bitmap转File\r\n    private fun bitmapToFile(bitmap: Bitmap): File {\r\n        val file = File.createTempFile(\"temp_image\", \".jpg\")\r\n        file.outputStream().use { out ->\r\n            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)\r\n        }\r\n        return file\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/exoticpet/AnalysisRepository.kt b/app/src/main/java/com/example/exoticpet/AnalysisRepository.kt
+--- a/app/src/main/java/com/example/exoticpet/AnalysisRepository.kt	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/app/src/main/java/com/example/exoticpet/AnalysisRepository.kt	(date 1774460437651)
+@@ -1,70 +1,244 @@
+ package com.example.exoticpet.repository
+ 
+ import android.graphics.Bitmap
+-import com.example.exoticpet.api.AnalysisResult
+-import com.example.exoticpet.api.RetrofitClient
++import android.util.Base64
++import android.util.Log
++import com.example.exoticpet.api.*
+ import com.example.exoticpet.models.Pet
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.withContext
+-import okhttp3.MediaType.Companion.toMediaTypeOrNull
+-import okhttp3.MultipartBody
+-import okhttp3.RequestBody.Companion.asRequestBody
+-import okhttp3.RequestBody.Companion.toRequestBody
+ import java.io.ByteArrayOutputStream
+-import java.io.File
+-import java.io.FileOutputStream
++import org.json.JSONArray
++import org.json.JSONObject
+ 
+ class AnalysisRepository {
+ 
+     private val api = RetrofitClient.instance
++    private val TAG = "AnalysisRepository"
+ 
+-    // 分析图片
+     suspend fun analyzeImage(
+         bitmap: Bitmap,
+         type: String,
+-        pet: Pet
++        pet: Pet,
++        customPrompt: String? = null
+     ): Result<AnalysisResult> = withContext(Dispatchers.IO) {
+         try {
+-            // 将Bitmap转换为文件
+-            val file = bitmapToFile(bitmap)
++            val base64Image = bitmapToBase64(bitmap)
++            val imageDataUrl = "data:image/jpeg;base64,$base64Image"
++
++            Log.d(TAG, "图片转换完成")
++
++            val prompt = customPrompt ?: buildPromptByType(type, pet)
++
++            val analysisText = callQwenVLAPI(imageDataUrl, prompt)
++            Log.d(TAG, "API返回: $analysisText")
++
++            val result = parseAnalysisResult(analysisText, type)
++
++            Result.success(result)
++        } catch (e: Exception) {
++            Log.e(TAG, "分析失败", e)
++            Result.failure(e)
++        }
++    }
++
++    private suspend fun callQwenVLAPI(
++        imageDataUrl: String,
++        prompt: String
++    ): String {
++        val request = QwenVLRequest(
++            model = "qwen-vl-plus",
++            input = QwenVLInput(
++                messages = listOf(
++                    QwenVLMessage(
++                        role = "user",
++                        content = listOf(
++                            QwenVLContent(image = imageDataUrl),
++                            QwenVLContent(text = prompt)
++                        )
++                    )
++                )
++            )
++        )
++
++        Log.d(TAG, "开始调用API...")
++
++        val response = api.analyzeWithQwenVL(
++            authorization = "Bearer ${RetrofitClient.DASHSCOPE_API_KEY}",
++            request = request
++        )
++
++        Log.d(TAG, "API响应码: ${response.code()}")
++
++        return if (response.isSuccessful) {
++            val body = response.body()
++            Log.d(TAG, "响应体: $body")
++
++            if (body?.code != null && body.code != "200" && body.code != "success") {
++                throw Exception("API错误: ${body.code} - ${body.message}")
++            }
++
++            // ✅ 关键修复：解析 content（可能是字符串或数组）
++            val content = extractContentFromResponse(body)
++            if (content.isNullOrEmpty()) {
++                throw Exception("API返回内容为空")
++            }
++            content
++        } else {
++            val errorBody = response.errorBody()?.string()
++            Log.e(TAG, "HTTP错误: ${response.code()}, 错误体: $errorBody")
++            throw Exception("API调用失败: ${response.code()} - $errorBody")
++        }
++    }
++
++    /**
++     * ✅ 新增：从响应中提取 content 内容
++     * 处理 content 可能是字符串或数组的情况
++     */
++    private fun extractContentFromResponse(response: QwenVLResponse?): String {
++        val message = response?.output?.choices?.firstOrNull()?.message ?: return ""
++
++        return when (val content = message.content) {
++            is String -> {
++                // 如果是字符串，直接返回
++                content
++            }
++            is List<*> -> {
++                // 如果是数组，提取所有 text 字段拼接
++                val stringBuilder = StringBuilder()
++                content.forEach { item ->
++                    when (item) {
++                        is Map<*, *> -> {
++                            val text = item["text"] as? String
++                            if (!text.isNullOrEmpty()) {
++                                stringBuilder.append(text)
++                            }
++                        }
++                        is String -> {
++                            stringBuilder.append(item)
++                        }
++                    }
++                }
++                stringBuilder.toString()
++            }
++            else -> {
++                // 其他情况，尝试转成 JSON 再解析
++                try {
++                    val json = JSONObject(content.toString())
++                    json.optString("text", content.toString())
++                } catch (e: Exception) {
++                    content.toString()
++                }
++            }
++        }
++    }
++
++    private fun buildPromptByType(type: String, pet: Pet): String {
++        val petInfo = "宠物信息：${pet.name}，种类：${pet.species}，年龄：${pet.birthDate}，体重：${pet.weight}g，体长：${pet.length}cm"
+ 
+-            // 创建MultipartBody.Part
+-            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+-            val imagePart = MultipartBody.Part.createFormData("image", file.name, requestFile)
+-
+-            // 创建petInfo
+-            val petInfo = """
++        return when (type) {
++            "health" -> """
++                你是一位专业的异宠兽医。请分析这张图片中的宠物健康状况。
++                $petInfo
++                
++                请仔细分析图片中的宠物，包括：
++                1. 整体外观状态
++                2. 皮肤/鳞片/毛发状况
++                3. 体型和姿态
++                4. 眼睛、四肢等细节
++                
++                请严格按以下JSON格式回答，只返回JSON，不要有其他内容：
+                 {
+-                    "name": "${pet.name}",
+-                    "species": "${pet.species}",
+-                    "age": "${pet.birthDate}",
+-                    "weight": ${pet.weight},
+-                    "length": ${pet.length}
++                    "status": "健康/需要注意/紧急",
++                    "score": 0-100的评分,
++                    "analysis": "详细分析结果（100字内）",
++                    "suggestions": "饲养建议（80字内）",
++                    "warnings": "注意事项（50字内）",
++                    "confidence": 置信度0-1
+                 }
+             """.trimIndent()
+ 
+-            val typeBody = type.toRequestBody("text/plain".toMediaTypeOrNull())
+-            val petInfoBody = petInfo.toRequestBody("text/plain".toMediaTypeOrNull())
++            "behavior" -> """
++                你是一位专业的异宠行为学家。请分析这张图片中宠物的行为状态。
++                $petInfo
++                
++                请分析图片中宠物的行为表现，包括：
++                1. 活动状态（活跃/安静/紧张）
++                2. 姿态和动作
++                3. 对环境反应
++                
++                请严格按以下JSON格式回答，只返回JSON，不要有其他内容：
++                {
++                    "status": "正常/活跃/异常",
++                    "score": 0-100的行为评分,
++                    "analysis": "行为分析（100字内）",
++                    "suggestions": "行为引导建议（80字内）",
++                    "warnings": "注意事项（50字内）",
++                    "confidence": 置信度0-1
++                }
++            """.trimIndent()
+ 
+-            // 调用API
+-            val response = api.analyzePetImage(imagePart, type, petInfo)
++            else -> """
++                你是一位专业的异宠营养师。请分析这张图片中宠物的饮食状况。
++                $petInfo
++                
++                请分析图片中与饮食相关的内容：
++                1. 体型判断（偏瘦/正常/偏胖）
++                2. 进食环境
++                3. 可能的营养状况
++                
++                请严格按以下JSON格式回答，只返回JSON，不要有其他内容：
++                {
++                    "status": "正常/需改善/异常",
++                    "score": 0-100的饮食评分,
++                    "analysis": "饮食分析（100字内）",
++                    "suggestions": "饮食建议（80字内）",
++                    "warnings": "注意事项（50字内）",
++                    "confidence": 置信度0-1
++                }
++            """.trimIndent()
++        }
++    }
+ 
+-            if (response.isSuccessful) {
+-                Result.success(response.body()!!)
+-            } else {
+-                Result.failure(Exception("API调用失败: ${response.code()}"))
++    private fun parseAnalysisResult(aiResponse: String, type: String): AnalysisResult {
++        return try {
++            var cleanedResponse = aiResponse.trim()
++            if (cleanedResponse.startsWith("```json")) {
++                cleanedResponse = cleanedResponse.removePrefix("```json").removeSuffix("```").trim()
++            } else if (cleanedResponse.startsWith("```")) {
++                cleanedResponse = cleanedResponse.removePrefix("```").removeSuffix("```").trim()
+             }
++
++            Log.d(TAG, "清理后的响应: $cleanedResponse")
++
++            val json = org.json.JSONObject(cleanedResponse)
++            AnalysisResult(
++                status = json.optString("status", "分析完成"),
++                score = json.optInt("score", 80),
++                analysis = json.optString("analysis", aiResponse.take(200)),
++                suggestions = json.optString("suggestions", "请咨询专业兽医获取更详细建议"),
++                warnings = json.optString("warnings", "如有异常请及时就医"),
++                confidence = json.optDouble("confidence", 0.85).toFloat(),
++                timestamp = System.currentTimeMillis()
++            )
+         } catch (e: Exception) {
+-            Result.failure(e)
++            Log.e(TAG, "JSON解析失败", e)
++            AnalysisResult(
++                status = "分析完成",
++                score = 75,
++                analysis = if (aiResponse.isNotEmpty()) aiResponse.take(300) else "AI分析完成，请查看详细结果",
++                suggestions = "AI分析结果仅供参考，如有疑问请咨询专业兽医",
++                warnings = "本分析结果不构成医疗诊断",
++                confidence = 0.7f,
++                timestamp = System.currentTimeMillis()
++            )
+         }
+     }
+ 
+-    // Bitmap转File
+-    private fun bitmapToFile(bitmap: Bitmap): File {
+-        val file = File.createTempFile("temp_image", ".jpg")
+-        file.outputStream().use { out ->
+-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
+-        }
+-        return file
++    private fun bitmapToBase64(bitmap: Bitmap): String {
++        val stream = ByteArrayOutputStream()
++        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
++        val bytes = stream.toByteArray()
++        return Base64.encodeToString(bytes, Base64.NO_WRAP)
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/java/com/example/exoticpet/ApiService.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.exoticpet.api\r\n\r\nimport okhttp3.MultipartBody\r\nimport retrofit2.Response\r\nimport retrofit2.http.*\r\n\r\ninterface ApiService {\r\n\r\n    // 上传图片进行分析\r\n    @Multipart\r\n    @POST(\"ai/analyze\")\r\n    suspend fun analyzePetImage(\r\n        @Part image: MultipartBody.Part,\r\n        @Part(\"type\") type: String,  // health, behavior, diet\r\n        @Part(\"petInfo\") petInfo: String\r\n    ): Response<AnalysisResult>\r\n\r\n    // 获取分析历史\r\n    @GET(\"ai/history\")\r\n    suspend fun getAnalysisHistory(\r\n        @Query(\"page\") page: Int,\r\n        @Query(\"size\") size: Int\r\n    ): Response<List<AnalysisHistory>>\r\n    @POST(\"auth/register\")\r\n    suspend fun register(\r\n        @Body request: RegisterRequest\r\n    ): Response<AuthResponse>\r\n\r\n    @POST(\"auth/login\")\r\n    suspend fun login(\r\n        @Body request: LoginRequest\r\n    ): Response<AuthResponse>\r\n}\r\n\r\n// API响应数据类\r\ndata class AnalysisResult(\r\n    val status: String,        // 健康状态\r\n    val score: Int,            // 评分\r\n    val analysis: String,      // 详细分析\r\n    val suggestions: String,   // 建议\r\n    val warnings: String,      // 注意事项\r\n    val confidence: Float,     // 置信度\r\n    val timestamp: Long        // 时间戳\r\n)\r\n\r\ndata class AnalysisHistory(\r\n    val id: String,\r\n    val imageUrl: String,\r\n    val result: AnalysisResult,\r\n    val createdAt: String\r\n)\r\n\r\ndata class RegisterRequest(\r\n    val username: String,\r\n    val password: String\r\n)\r\n\r\ndata class LoginRequest(\r\n    val username: String,\r\n    val password: String\r\n)\r\n\r\ndata class AuthResponse(\r\n    val success: Boolean,\r\n    val message: String,\r\n    val userId: Int? = null,\r\n    val username: String? = null,\r\n    val token: String? = null\r\n)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/exoticpet/ApiService.kt b/app/src/main/java/com/example/exoticpet/ApiService.kt
+--- a/app/src/main/java/com/example/exoticpet/ApiService.kt	(revision 1d7b3027fb0cdb93cb2859fe8cc6d35f0a6a4354)
++++ b/app/src/main/java/com/example/exoticpet/ApiService.kt	(date 1774460437656)
+@@ -1,69 +1,67 @@
+ package com.example.exoticpet.api
+ 
+-import okhttp3.MultipartBody
+ import retrofit2.Response
+ import retrofit2.http.*
+ 
+ interface ApiService {
+ 
+-    // 上传图片进行分析
+-    @Multipart
+-    @POST("ai/analyze")
+-    suspend fun analyzePetImage(
+-        @Part image: MultipartBody.Part,
+-        @Part("type") type: String,  // health, behavior, diet
+-        @Part("petInfo") petInfo: String
+-    ): Response<AnalysisResult>
++    // 通义千问VL多模态分析接口
++    @POST("api/v1/services/aigc/multimodal-generation/generation")
++    suspend fun analyzeWithQwenVL(
++        @Header("Authorization") authorization: String,
++        @Header("Content-Type") contentType: String = "application/json",
++        @Body request: QwenVLRequest
++    ): Response<QwenVLResponse>
++}
+ 
+-    // 获取分析历史
+-    @GET("ai/history")
+-    suspend fun getAnalysisHistory(
+-        @Query("page") page: Int,
+-        @Query("size") size: Int
+-    ): Response<List<AnalysisHistory>>
+-    @POST("auth/register")
+-    suspend fun register(
+-        @Body request: RegisterRequest
+-    ): Response<AuthResponse>
++// ============ 通义千问VL官方格式 ============
++data class QwenVLRequest(
++    val model: String = "qwen-vl-plus",
++    val input: QwenVLInput
++)
+ 
+-    @POST("auth/login")
+-    suspend fun login(
+-        @Body request: LoginRequest
+-    ): Response<AuthResponse>
+-}
++data class QwenVLInput(
++    val messages: List<QwenVLMessage>
++)
++
++data class QwenVLMessage(
++    val role: String = "user",
++    val content: List<QwenVLContent>
++)
++
++data class QwenVLContent(
++    val text: String? = null,
++    val image: String? = null
++)
++
++// ✅ 修正：响应体中的 content 可能是数组
++data class QwenVLResponse(
++    val output: QwenVLOutput?,
++    val code: String?,
++    val message: String?
++)
++
++data class QwenVLOutput(
++    val choices: List<QwenVLChoice>
++)
++
++data class QwenVLChoice(
++    val message: QwenVLResultMessage
++)
+ 
+-// API响应数据类
++// ✅ 修正：content 可能是字符串或数组
++data class QwenVLResultMessage(
++    val role: String,
++    val content: Any  // 改为 Any 类型，可以接收字符串或数组
++)
++
++// 统一的分析结果数据类
+ data class AnalysisResult(
+-    val status: String,        // 健康状态
+-    val score: Int,            // 评分
+-    val analysis: String,      // 详细分析
+-    val suggestions: String,   // 建议
+-    val warnings: String,      // 注意事项
+-    val confidence: Float,     // 置信度
+-    val timestamp: Long        // 时间戳
+-)
+-
+-data class AnalysisHistory(
+-    val id: String,
+-    val imageUrl: String,
+-    val result: AnalysisResult,
+-    val createdAt: String
+-)
+-
+-data class RegisterRequest(
+-    val username: String,
+-    val password: String
+-)
+-
+-data class LoginRequest(
+-    val username: String,
+-    val password: String
+-)
+-
+-data class AuthResponse(
+-    val success: Boolean,
+-    val message: String,
+-    val userId: Int? = null,
+-    val username: String? = null,
+-    val token: String? = null
++    val status: String,
++    val score: Int,
++    val analysis: String,
++    val suggestions: String,
++    val warnings: String,
++    val confidence: Float,
++    val timestamp: Long
+ )
+\ No newline at end of file
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+new file mode 100644
+--- /dev/null	(date 1774460437621)
++++ b/.idea/gradle.xml	(date 1774460437621)
+@@ -0,0 +1,18 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="GradleSettings">
++    <option name="linkedExternalProjectsSettings">
++      <GradleProjectSettings>
++        <option name="testRunner" value="CHOOSE_PER_TEST" />
++        <option name="externalProjectPath" value="$PROJECT_DIR$" />
++        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
++        <option name="modules">
++          <set>
++            <option value="$PROJECT_DIR$" />
++            <option value="$PROJECT_DIR$/app" />
++          </set>
++        </option>
++      </GradleProjectSettings>
++    </option>
++  </component>
++</project>
+\ No newline at end of file

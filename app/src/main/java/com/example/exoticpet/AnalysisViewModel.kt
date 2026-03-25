@@ -14,19 +14,15 @@ class AnalysisViewModel : ViewModel() {
 
     private val repository = AnalysisRepository()
 
-    // 分析结果
     private val _analysisResult = MutableLiveData<AnalysisResult?>()
     val analysisResult: LiveData<AnalysisResult?> = _analysisResult
 
-    // 加载状态
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    // 错误信息
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
-    // 分析类型
     private val _analysisType = MutableLiveData("health")
     val analysisType: LiveData<String> = _analysisType
 
@@ -34,34 +30,29 @@ class AnalysisViewModel : ViewModel() {
         _analysisType.value = type
     }
 
-    // 分析图片
     fun analyzeImage(bitmap: Bitmap, pet: Pet) {
         viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
-
             try {
+                _isLoading.value = true
+                _error.value = null
+
                 val result = repository.analyzeImage(bitmap, _analysisType.value!!, pet)
 
                 result.onSuccess { analysisResult ->
                     _analysisResult.value = analysisResult
-                    // 保存到数据库（可选）
-                    saveAnalysisToDatabase(analysisResult)
                 }.onFailure { exception ->
                     _error.value = "分析失败: ${exception.message}"
+                    exception.printStackTrace()
                 }
+            } catch (e: Exception) {
+                _error.value = "异常: ${e.message}"
+                e.printStackTrace()
             } finally {
                 _isLoading.value = false
             }
         }
     }
 
-    // 保存分析结果到数据库（可选）
-    private fun saveAnalysisToDatabase(result: AnalysisResult) {
-        // TODO: 实现数据库保存
-    }
-
-    // 清除结果
     fun clearResult() {
         _analysisResult.value = null
     }

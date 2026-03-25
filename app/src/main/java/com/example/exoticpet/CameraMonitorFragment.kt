@@ -26,7 +26,7 @@ import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class MonitorFragment : Fragment() {
+class CameraMonitorFragment : Fragment() {
 
     private lateinit var previewView: PreviewView
     private lateinit var switchMonitoring: Switch
@@ -213,6 +213,7 @@ class MonitorFragment : Fragment() {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val photoFile = File(outputDir, "snapshot_$timestamp.jpg")
 
+        // 修复：明确指定使用 File 类型的 Builder
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
         imageCapture.takePicture(
@@ -232,7 +233,7 @@ class MonitorFragment : Fragment() {
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-                    Log.e("MonitorFragment", "拍照失败", exception)
+                    Log.e("CameraMonitorFragment", "拍照失败", exception)
                     Toast.makeText(requireContext(), "拍照失败: ${exception.message}", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -324,21 +325,21 @@ class MonitorFragment : Fragment() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
         cameraProviderFuture.addListener({
-            cameraProvider = cameraProviderFuture.get()
-
-            // 预览
-            val preview = Preview.Builder().build()
-            preview.setSurfaceProvider(previewView.surfaceProvider)
-
-            // 图像捕获
-            imageCapture = ImageCapture.Builder()
-                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                .build()
-
-            // 选择相机
-            cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
             try {
+                cameraProvider = cameraProviderFuture.get()
+
+                // 预览
+                val preview = Preview.Builder().build()
+                preview.setSurfaceProvider(previewView.surfaceProvider)
+
+                // 图像捕获
+                imageCapture = ImageCapture.Builder()
+                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                    .build()
+
+                // 选择相机
+                cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
                 cameraProvider?.unbindAll()
                 camera = cameraProvider?.bindToLifecycle(
                     this,
@@ -347,7 +348,7 @@ class MonitorFragment : Fragment() {
                     imageCapture
                 )
             } catch (exc: Exception) {
-                Log.e("MonitorFragment", "相机启动失败", exc)
+                Log.e("CameraMonitorFragment", "相机启动失败", exc)
                 Toast.makeText(requireContext(), "相机启动失败: ${exc.message}", Toast.LENGTH_SHORT).show()
             }
         }, ContextCompat.getMainExecutor(requireContext()))
