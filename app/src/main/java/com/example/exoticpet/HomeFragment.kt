@@ -8,22 +8,25 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.exoticpet.models.Pet
-import com.example.exoticpet.models.Record
+import com.example.exoticpet.api.RecordDto
+import com.example.exoticpet.api.RetrofitClient
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class HomeFragment : Fragment() {
 
-    private lateinit var dbHelper: PetDatabase
     private lateinit var tvName: TextView
     private lateinit var tvSpecies: TextView
     private lateinit var tvLength: TextView
@@ -33,6 +36,7 @@ class HomeFragment : Fragment() {
     private lateinit var lineChart: LineChart
     private lateinit var recyclerView: RecyclerView
     private lateinit var btnEdit: ImageView
+    private lateinit var btnLogout: ImageView
     private lateinit var btnAddRecord: Button
     private lateinit var btnViewHistory: CardView
 
@@ -40,15 +44,13 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        dbHelper = PetDatabase(requireContext())
         initViews(view)
         setupClickListeners()
         loadPetData()
         loadRecentRecords()
-        setupGrowthChart()
 
         return view
     }
@@ -57,7 +59,6 @@ class HomeFragment : Fragment() {
         super.onResume()
         loadPetData()
         loadRecentRecords()
-        setupGrowthChart()
     }
 
     private fun initViews(view: View) {
@@ -70,6 +71,7 @@ class HomeFragment : Fragment() {
         lineChart = view.findViewById(R.id.lineChart)
         recyclerView = view.findViewById(R.id.recyclerView)
         btnEdit = view.findViewById(R.id.btnEdit)
+        btnLogout = view.findViewById(R.id.btnLogout)
         btnAddRecord = view.findViewById(R.id.btnAddRecord)
         btnViewHistory = view.findViewById(R.id.btnViewHistory)
 
@@ -81,31 +83,58 @@ class HomeFragment : Fragment() {
             startActivity(Intent(requireContext(), EditPetActivity::class.java))
         }
 
+        btnLogout.setOnClickListener {
+            UserSession.clear(requireContext())
+            startActivity(Intent(requireContext(), LoginActivity::class.java))
+            requireActivity().finish()
+        }
+
         btnAddRecord.setOnClickListener {
             startActivity(Intent(requireContext(), AddRecordActivity::class.java))
         }
 
         btnViewHistory.setOnClickListener {
-            // 通过底部导航切换到历史记录
             val activity = requireActivity() as MainActivity
             activity.bottomNavigation.selectedItemId = R.id.navigation_history
         }
     }
 
     private fun loadPetData() {
-        val pet = dbHelper.getPet()
-        tvName.text = pet.name
-        tvSpecies.text = "${pet.species} | 年龄：${calculateAge(pet.birthDate)}"
-        tvLength.text = "体长：${pet.length}cm"
-        tvWeight.text = "体重：${pet.weight}g"
-        tvHealthScore.text = "最新分析：健康（${pet.healthScore}分）"
-        tvLastCheckup.text = "上次体检：${pet.lastCheckup}"
+        val userId = UserSession.getUserId(requireContext())
+        if (userId == 0) return
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.instance.getMyPet(userId)
+                val pet = response.body()
+
+                if (response.isSuccessful && pet != null) {
+                    tvName.text = pet.name
+                    tvSpecies.text = "${pet.species} | 年龄：${calculateAge(pet.birthDate ?: "")}"
+                    tvLength.text = "体长：${pet.length ?: 0.0}cm"
+                    tvWeight.text = "体重：${pet.weight ?: 0.0}g"
+                    tvHealthScore.text = "最新分析：${pet.healthScore ?: 0}分"
+                    tvLastCheckup.text = "上次体检：${pet.lastCheckup ?: "暂无"}"
+                    setupGrowthChart(pet.weight?.toFloat() ?: 0f)
+                } else {
+                    tvName.text = "还未建档"
+                    tvSpecies.text = "请先填写宠物问卷"
+                    tvLength.text = "体长：--"
+                    tvWeight.text = "体重：--"
+                    tvHealthScore.text = "最新分析：暂无"
+                    tvLastCheckup.text = "上次体检：暂无"
+                    setupGrowthChart(0f)
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "加载宠物档案失败：${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun calculateAge(birthDate: String): String {
         return try {
             val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val birth = format.parse(birthDate)
+            val birth = format.parse(birthDate) ?: return "未知"
             val now = Date()
             val diff = now.time - birth.time
             val months = (diff / (1000L * 60 * 60 * 24 * 30)).toInt()
@@ -116,19 +145,27 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadRecentRecords() {
-        val records = dbHelper.getAllRecords()
-        val recentRecords = if (records.size > 2) records.subList(0, 2) else records
+        val userId = UserSession.getUserId(requireContext())
+        if (userId == 0) return
 
-        val adapter = RecentRecordsAdapter(recentRecords)
-        recyclerView.adapter = adapter
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.instance.getRecords(userId, "全部")
+                val records = response.body().orEmpty()
+                val recentRecords = if (records.size > 2) records.subList(0, 2) else records
+                recyclerView.adapter = RecentRecordsAdapter(recentRecords)
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "加载历史记录失败：${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
-    private fun setupGrowthChart() {
+    private fun setupGrowthChart(currentWeight: Float) {
         val entries = ArrayList<Entry>()
-        entries.add(Entry(0f, 100f))
-        entries.add(Entry(1f, 110f))
-        entries.add(Entry(2f, 118f))
-        entries.add(Entry(3f, 125f))
+        entries.add(Entry(0f, if (currentWeight > 0) currentWeight * 0.8f else 0f))
+        entries.add(Entry(1f, if (currentWeight > 0) currentWeight * 0.9f else 0f))
+        entries.add(Entry(2f, if (currentWeight > 0) currentWeight * 0.95f else 0f))
+        entries.add(Entry(3f, currentWeight))
 
         val dataSet = LineDataSet(entries, "体重趋势(g)")
         dataSet.color = android.graphics.Color.parseColor("#FF9800")
@@ -137,14 +174,12 @@ class HomeFragment : Fragment() {
         dataSet.setDrawCircles(true)
         dataSet.setCircleColor(android.graphics.Color.parseColor("#FF9800"))
 
-        val lineData = LineData(dataSet)
-        lineChart.data = lineData
+        lineChart.data = LineData(dataSet)
         lineChart.description.isEnabled = false
         lineChart.invalidate()
     }
 
-    // 将 RecentRecordsAdapter 移到这里作为内部类
-    inner class RecentRecordsAdapter(private val records: List<Record>) :
+    inner class RecentRecordsAdapter(private val records: List<RecordDto>) :
         RecyclerView.Adapter<RecentRecordsAdapter.ViewHolder>() {
 
         inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -161,9 +196,13 @@ class HomeFragment : Fragment() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val record = records[position]
-            holder.tvDate.text = record.date.substring(5) // 只显示月-日
-            holder.tvType.text = record.type
-            holder.tvDescription.text = record.description
+
+            val dateText = record.date ?: ""
+            holder.tvDate.text =
+                if (dateText.length >= 5) dateText.substring(5) else if (dateText.isNotBlank()) dateText else "--"
+
+            holder.tvType.text = record.type ?: "未分类"
+            holder.tvDescription.text = record.description ?: "无描述"
         }
 
         override fun getItemCount() = records.size

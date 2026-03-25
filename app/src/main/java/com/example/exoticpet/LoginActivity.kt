@@ -63,14 +63,22 @@ class LoginActivity : AppCompatActivity() {
                 val response = RetrofitClient.instance.login(LoginRequest(username, password))
 
                 if (response.isSuccessful && response.body()?.success == true) {
+                    val body = response.body()!!
+
                     prefs.edit {
                         putBoolean("is_logged_in", true)
-                        putInt("user_id", response.body()?.userId ?: 0)
-                        putString("username", response.body()?.username ?: username)
-                        putString("token", response.body()?.token ?: "")
+                        putInt("user_id", body.userId ?: 0)
+                        putString("username", body.username ?: username)
+                        putString("token", body.token ?: "")
                     }
+
                     Toast.makeText(this@LoginActivity, "登录成功", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+
+                    if (body.profileCompleted) {
+                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                    } else {
+                        startActivity(Intent(this@LoginActivity, PetProfileSetupActivity::class.java))
+                    }
                     finish()
                 } else {
                     Toast.makeText(

@@ -7,12 +7,12 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface ApiService {
 
-    // 通义千问VL多模态分析接口
     @POST("https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation")
     suspend fun analyzeWithQwenVL(
         @Header("Authorization") authorization: String,
@@ -20,7 +20,6 @@ interface ApiService {
         @Body request: QwenVLRequest
     ): Response<QwenVLResponse>
 
-    // 后端图片分析接口（保留，不删功能）
     @Multipart
     @POST("ai/analyze")
     suspend fun analyzePetImage(
@@ -29,7 +28,6 @@ interface ApiService {
         @Part("petInfo") petInfo: String
     ): Response<AnalysisResult>
 
-    // 分析历史
     @GET("ai/history")
     suspend fun getAnalysisHistory(
         @Query("page") page: Int,
@@ -45,9 +43,33 @@ interface ApiService {
     suspend fun login(
         @Body request: LoginRequest
     ): Response<AuthResponse>
-}
 
-// ============ 通义千问VL请求/响应模型 ============
+    @GET("pets/me")
+    suspend fun getMyPet(
+        @Query("userId") userId: Int
+    ): Response<PetProfileDto>
+
+    @PUT("pets/me")
+    suspend fun saveMyPet(
+        @Body request: PetProfileRequest
+    ): Response<SimpleApiResponse>
+
+    @GET("records")
+    suspend fun getRecords(
+        @Query("userId") userId: Int,
+        @Query("type") type: String? = null
+    ): Response<List<RecordDto>>
+
+    @POST("records/manual")
+    suspend fun addManualRecord(
+        @Body request: RecordRequest
+    ): Response<SimpleApiResponse>
+
+    @POST("records/analysis")
+    suspend fun saveAnalysisRecord(
+        @Body request: RecordRequest
+    ): Response<SimpleApiResponse>
+}
 
 data class QwenVLRequest(
     val model: String = "qwen-vl-plus",
@@ -87,8 +109,6 @@ data class QwenVLResultMessage(
     val content: Any
 )
 
-// ============ 业务数据模型 ============
-
 data class AnalysisResult(
     val status: String,
     val score: Int,
@@ -121,5 +141,70 @@ data class AuthResponse(
     val message: String,
     val userId: Int? = null,
     val username: String? = null,
-    val token: String? = null
+    val token: String? = null,
+    val profileCompleted: Boolean = false
+)
+
+data class PetProfileDto(
+    val id: Int? = null,
+    val userId: Int,
+    val name: String,
+    val species: String,
+    val gender: String? = null,
+    val birthDate: String? = null,
+    val length: Double? = null,
+    val weight: Double? = null,
+    val specialMark: String? = null,
+    val enclosureSize: String? = null,
+    val stapleFood: String? = null,
+    val healthScore: Int? = 0,
+    val lastCheckup: String? = null
+)
+
+data class PetProfileRequest(
+    val userId: Int,
+    val name: String,
+    val species: String,
+    val gender: String,
+    val birthDate: String,
+    val length: Double,
+    val weight: Double,
+    val specialMark: String,
+    val enclosureSize: String,
+    val stapleFood: String,
+    val healthScore: Int = 0,
+    val lastCheckup: String = "首次建档"
+)
+
+data class RecordDto(
+    val id: Int = 0,
+    val date: String? = null,
+    val time: String? = null,
+    val type: String? = null,
+    val description: String? = null,
+    val suggestion: String? = null,
+    val score: Int? = null,
+    val status: String? = null,
+    val confidence: Double? = null,
+    val recordSource: String? = null,
+    val analysisType: String? = null
+)
+
+data class RecordRequest(
+    val userId: Int,
+    val date: String,
+    val time: String,
+    val type: String,
+    val description: String,
+    val suggestion: String,
+    val score: Int? = null,
+    val status: String? = null,
+    val confidence: Double? = null,
+    val recordSource: String? = "MANUAL",
+    val analysisType: String? = null
+)
+
+data class SimpleApiResponse(
+    val success: Boolean,
+    val message: String
 )

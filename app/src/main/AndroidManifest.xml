@@ -67,6 +67,10 @@
             android:name=".RegisterActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".PetProfileSetupActivity"
+            android:exported="false" />
+
         <!-- 编辑档案页面 -->
         <activity
             android:name=".EditPetActivity"

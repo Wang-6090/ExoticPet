@@ -1,5 +1,6 @@
 package com.example.exoticpet
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -10,7 +11,7 @@ import com.example.exoticpet.api.PetProfileRequest
 import com.example.exoticpet.api.RetrofitClient
 import kotlinx.coroutines.launch
 
-class EditPetActivity : AppCompatActivity() {
+class PetProfileSetupActivity : AppCompatActivity() {
 
     private lateinit var etName: EditText
     private lateinit var etSpecies: EditText
@@ -28,12 +29,6 @@ class EditPetActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_pet)
 
-        initViews()
-        loadPetData()
-        setupClickListeners()
-    }
-
-    private fun initViews() {
         etName = findViewById(R.id.etName)
         etSpecies = findViewById(R.id.etSpecies)
         etGender = findViewById(R.id.etGender)
@@ -45,66 +40,34 @@ class EditPetActivity : AppCompatActivity() {
         etStapleFood = findViewById(R.id.etStapleFood)
         btnSave = findViewById(R.id.btnSave)
         btnCancel = findViewById(R.id.btnCancel)
-    }
 
-    private fun loadPetData() {
-        val userId = UserSession.getUserId(this)
-        lifecycleScope.launch {
-            try {
-                val response = RetrofitClient.instance.getMyPet(userId)
-                val pet = response.body() ?: return@launch
+        btnSave.text = "完成问卷并进入首页"
+        btnCancel.text = "稍后填写"
 
-                etName.setText(pet.name)
-                etSpecies.setText(pet.species)
-                etGender.setText(pet.gender ?: "")
-                etBirthDate.setText(pet.birthDate ?: "")
-                etLength.setText((pet.length ?: 0.0).toString())
-                etWeight.setText((pet.weight ?: 0.0).toString())
-                etSpecialMark.setText(pet.specialMark ?: "")
-                etEnclosureSize.setText(pet.enclosureSize ?: "")
-                etStapleFood.setText(pet.stapleFood ?: "")
-            } catch (e: Exception) {
-                Toast.makeText(this@EditPetActivity, "加载宠物信息失败：${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun setupClickListeners() {
         btnSave.setOnClickListener {
-            if (validateInputs()) {
-                savePetData()
-            }
+            saveProfile()
         }
 
         btnCancel.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
     }
 
-    private fun validateInputs(): Boolean {
-        if (etName.text.isNullOrBlank()) {
-            etName.error = "请输入昵称"
-            return false
+    private fun saveProfile() {
+        val userId = UserSession.getUserId(this)
+        if (userId == 0) {
+            Toast.makeText(this, "登录状态失效，请重新登录", Toast.LENGTH_SHORT).show()
+            return
         }
-        if (etSpecies.text.isNullOrBlank()) {
-            etSpecies.error = "请输入品种"
-            return false
-        }
-        if (etLength.text.isNullOrBlank()) {
-            etLength.error = "请输入体长"
-            return false
-        }
-        if (etWeight.text.isNullOrBlank()) {
-            etWeight.error = "请输入体重"
-            return false
-        }
-        return true
-    }
 
-    private fun savePetData() {
+        if (etName.text.isNullOrBlank() || etSpecies.text.isNullOrBlank()) {
+            Toast.makeText(this, "请至少填写宠物昵称和品种", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         lifecycleScope.launch {
             try {
-                val userId = UserSession.getUserId(this@EditPetActivity)
                 val response = RetrofitClient.instance.saveMyPet(
                     PetProfileRequest(
                         userId = userId,
@@ -118,18 +81,19 @@ class EditPetActivity : AppCompatActivity() {
                         enclosureSize = etEnclosureSize.text.toString().trim(),
                         stapleFood = etStapleFood.text.toString().trim(),
                         healthScore = 0,
-                        lastCheckup = "手动更新资料"
+                        lastCheckup = "首次建档"
                     )
                 )
 
                 if (response.isSuccessful && response.body()?.success == true) {
-                    Toast.makeText(this@EditPetActivity, "保存成功", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@PetProfileSetupActivity, "宠物档案已创建", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this@PetProfileSetupActivity, MainActivity::class.java))
                     finish()
                 } else {
-                    Toast.makeText(this@EditPetActivity, response.body()?.message ?: "保存失败", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@PetProfileSetupActivity, response.body()?.message ?: "保存失败", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@EditPetActivity, "输入格式错误或网络异常：${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@PetProfileSetupActivity, "网络错误：${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

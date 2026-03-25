@@ -1,15 +1,24 @@
 package com.example.exoticpet
 
 import android.os.Bundle
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.exoticpet.models.Record
+import androidx.lifecycle.lifecycleScope
+import com.example.exoticpet.api.RecordRequest
+import com.example.exoticpet.api.RetrofitClient
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 class AddRecordActivity : AppCompatActivity() {
 
-    private lateinit var dbHelper: PetDatabase
     private lateinit var radioGroup: RadioGroup
     private lateinit var rbFeed: RadioButton
     private lateinit var rbCheckup: RadioButton
@@ -23,7 +32,6 @@ class AddRecordActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_record)
 
-        dbHelper = PetDatabase(this)
         initViews()
         setCurrentDateTime()
         setupClickListeners()
@@ -57,8 +65,10 @@ class AddRecordActivity : AppCompatActivity() {
             { _, year, month, dayOfMonth ->
                 val timePicker = android.app.TimePickerDialog(this,
                     { _, hourOfDay, minute ->
-                        val dateStr = String.format("%04d-%02d-%02d %02d:%02d",
-                            year, month + 1, dayOfMonth, hourOfDay, minute)
+                        val dateStr = String.format(
+                            "%04d-%02d-%02d %02d:%02d",
+                            year, month + 1, dayOfMonth, hourOfDay, minute
+                        )
                         tvDateTime.text = dateStr
                     },
                     calendar.get(Calendar.HOUR_OF_DAY),
@@ -92,28 +102,37 @@ class AddRecordActivity : AppCompatActivity() {
         val dateTime = tvDateTime.text.toString()
         val date = dateTime.substring(0, 10)
         val time = dateTime.substring(11)
-
-        val description = etDescription.text.toString()
+        val description = etDescription.text.toString().trim()
 
         if (description.isBlank()) {
             Toast.makeText(this, "请输入描述", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val record = Record(
-            date = date,
-            time = time,
-            type = selectedType,
-            description = description,
-            suggestion = ""
-        )
+        lifecycleScope.launch {
+            try {
+                val userId = UserSession.getUserId(this@AddRecordActivity)
+                val response = RetrofitClient.instance.addManualRecord(
+                    RecordRequest(
+                        userId = userId,
+                        date = date,
+                        time = time,
+                        type = selectedType,
+                        description = description,
+                        suggestion = "",
+                        recordSource = "MANUAL"
+                    )
+                )
 
-        val result = dbHelper.addRecord(record)
-        if (result > 0) {
-            Toast.makeText(this, "记录保存成功", Toast.LENGTH_SHORT).show()
-            finish()
-        } else {
-            Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show()
+                if (response.isSuccessful && response.body()?.success == true) {
+                    Toast.makeText(this@AddRecordActivity, "记录保存成功", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Toast.makeText(this@AddRecordActivity, response.body()?.message ?: "保存失败", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(this@AddRecordActivity, "网络错误：${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

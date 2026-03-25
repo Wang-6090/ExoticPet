@@ -20,6 +20,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.exoticpet.viewmodel.AnalysisViewModel
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.example.exoticpet.api.RetrofitClient
+import com.example.exoticpet.api.RecordRequest
 
 class AnalysisFragment : Fragment() {
 
@@ -247,12 +251,65 @@ class AnalysisFragment : Fragment() {
                     else -> android.graphics.Color.parseColor("#F44336")
                 }
                 tvHealthStatus.setTextColor(statusColor)
+
+                saveAnalysisRecordToOracle(
+                    status = it.status,
+                    score = it.score,
+                    analysis = it.analysis,
+                    suggestions = it.suggestions,
+                    confidence = it.confidence
+                )
             }
         }
 
         viewModel.error.observe(viewLifecycleOwner) { errorMsg ->
             errorMsg?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun saveAnalysisRecordToOracle(
+        status: String,
+        score: Int,
+        analysis: String,
+        suggestions: String,
+        confidence: Float
+    ) {
+        val userId = UserSession.getUserId(requireContext())
+        if (userId == 0) return
+
+        val now = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
+            .format(java.util.Date())
+        val date = now.substring(0, 10)
+        val time = now.substring(11)
+
+        val currentType = when (viewModel.analysisType.value ?: "health") {
+            "health" -> if (score < 60 || status.contains("紧急") || status.contains("异常")) "异常" else "体检"
+            "behavior" -> if (score < 60 || status.contains("异常")) "异常" else "其他"
+            "diet" -> if (score < 60 || status.contains("异常")) "异常" else "喂食"
+            else -> "体检"
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                RetrofitClient.instance.saveAnalysisRecord(
+                    RecordRequest(
+                        userId = userId,
+                        date = date,
+                        time = time,
+                        type = currentType,
+                        description = analysis,
+                        suggestion = suggestions,
+                        score = score,
+                        status = status,
+                        confidence = confidence.toDouble(),
+                        recordSource = "AI",
+                        analysisType = viewModel.analysisType.value ?: "health"
+                    )
+                )
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "AI结果写入历史失败：${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
