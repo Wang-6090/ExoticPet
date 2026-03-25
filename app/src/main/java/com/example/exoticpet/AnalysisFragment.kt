@@ -4,6 +4,97 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
+//package com.example.exoticpet
+//
+//import android.net.Uri
+//import android.os.Bundle
+//import android.view.LayoutInflater
+//import android.view.View
+//import android.view.ViewGroup
+//import android.widget.Button
+//import android.widget.ImageView
+//import android.widget.ProgressBar
+//import android.widget.Toast
+//import androidx.activity.result.contract.ActivityResultContracts
+//import androidx.fragment.app.Fragment
+//import androidx.cardview.widget.CardView
+//
+//class AnalysisFragment : Fragment() {
+//
+//    private lateinit var imageView: ImageView
+//    private lateinit var btnTakePhoto: Button
+//    private lateinit var btnChooseFromGallery: Button
+//    private lateinit var btnAnalyze: Button
+//    private lateinit var progressBar: ProgressBar
+//    private lateinit var resultCard: CardView
+//
+//    private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
+//        bitmap?.let {
+//            imageView.setImageBitmap(it)
+//            btnAnalyze.isEnabled = true
+//            Toast.makeText(requireContext(), "照片已选择", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+//
+//    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+//        uri?.let {
+//            imageView.setImageURI(uri)
+//            btnAnalyze.isEnabled = true
+//            Toast.makeText(requireContext(), "图片已选择", Toast.LENGTH_SHORT).show()
+//        }
+//    }
+//
+//    override fun onCreateView(
+//        inflater: LayoutInflater,
+//        container: ViewGroup?,
+//        savedInstanceState: Bundle?
+//    ): View? {
+//        val view = inflater.inflate(R.layout.fragment_analysis, container, false)
+//
+//        initViews(view)
+//        setupClickListeners()
+//
+//        return view
+//    }
+//
+//    private fun initViews(view: View) {
+//        imageView = view.findViewById(R.id.imageView)
+//        btnTakePhoto = view.findViewById(R.id.btnTakePhoto)
+//        btnChooseFromGallery = view.findViewById(R.id.btnChooseFromGallery)
+//        btnAnalyze = view.findViewById(R.id.btnAnalyze)
+//        progressBar = view.findViewById(R.id.progressBar)
+//        resultCard = view.findViewById(R.id.resultCard)
+//
+//        btnAnalyze.isEnabled = false
+//        resultCard.visibility = View.GONE
+//    }
+//
+//    private fun setupClickListeners() {
+//        btnTakePhoto.setOnClickListener {
+//            takePhotoLauncher.launch(null)
+//        }
+//
+//        btnChooseFromGallery.setOnClickListener {
+//            pickImageLauncher.launch("image/*")
+//        }
+//
+//        btnAnalyze.setOnClickListener {
+//            progressBar.visibility = View.VISIBLE
+//            btnAnalyze.isEnabled = false
+//
+//            view?.postDelayed({
+//                progressBar.visibility = View.GONE
+//                btnAnalyze.isEnabled = true
+//                resultCard.visibility = View.VISIBLE
+//                Toast.makeText(requireContext(), "分析完成，请查看结果区域", Toast.LENGTH_SHORT).show()
+//            }, 2000)
+//        }
+//    }
+//}
+
+package com.example.exoticpet
+
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +111,10 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.exoticpet.viewmodel.AnalysisViewModel
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.example.exoticpet.viewmodel.AnalysisViewModel
+import android.widget.LinearLayout
 import com.example.exoticpet.models.Pet
 
 class AnalysisFragment : Fragment() {
@@ -68,6 +163,7 @@ class AnalysisFragment : Fragment() {
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             imageView.setImageURI(uri)
+            // 将URI转换为Bitmap
             try {
                 val inputStream = requireContext().contentResolver.openInputStream(uri)
                 val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
@@ -76,6 +172,7 @@ class AnalysisFragment : Fragment() {
                 viewModel.clearResult()
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "图片加载失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "图片加载失败", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -98,6 +195,12 @@ class AnalysisFragment : Fragment() {
             e.printStackTrace()
             Toast.makeText(requireContext(), "初始化失败: ${e.message}", Toast.LENGTH_SHORT).show()
         }
+        dbHelper = PetDatabase(requireContext())
+        viewModel = ViewModelProvider(this)[AnalysisViewModel::class.java]
+
+        initViews(view)
+        setupClickListeners()
+        observeViewModel()
 
         return view
     }
@@ -131,6 +234,11 @@ class AnalysisFragment : Fragment() {
         btnChooseFromGallery.setOnClickListener {
             // 选择图片需要存储权限
             checkStoragePermission()
+            takePhotoLauncher.launch(null)
+        }
+
+        btnChooseFromGallery.setOnClickListener {
+            pickImageLauncher.launch("image/*")
         }
 
         btnAnalyze.setOnClickListener {
@@ -143,6 +251,8 @@ class AnalysisFragment : Fragment() {
                 }
             } else {
                 Toast.makeText(requireContext(), "请先选择图片", Toast.LENGTH_SHORT).show()
+                val pet = dbHelper.getPet()
+                viewModel.analyzeImage(currentImageBitmap!!, pet)
             }
         }
 
@@ -253,6 +363,7 @@ class AnalysisFragment : Fragment() {
                 tvSuggestion.text = "饲养建议：${it.suggestions}"
                 tvWarning.text = "注意事项：${it.warnings}"
 
+                // 根据评分设置颜色
                 val statusColor = when {
                     it.score >= 75 -> android.graphics.Color.parseColor("#4CAF50")
                     it.score >= 60 -> android.graphics.Color.parseColor("#FF9800")

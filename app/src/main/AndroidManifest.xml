@@ -17,6 +17,24 @@
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <!-- ========== 所有权限声明必须在 application 外部 ========== -->
+
+    <!-- 网络权限（用于AI分析API调用） -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- 相机权限（用于拍照） -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- 存储权限（用于从相册选择图片） -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!-- Android 13+ 需要这个权限来读取图片和视频 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- 声明相机硬件为可选（这样没有相机的设备也能安装） -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -34,6 +52,15 @@
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
+        <!-- 主Activity - 带底部导航栏 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -41,10 +68,16 @@
         </activity>
 
         <activity
+            android:name=".RegisterActivity"
+            android:exported="false" />
+
+        <!-- 编辑档案页面 -->
+        <activity
             android:name=".EditPetActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <!-- 新增记录页面 -->
         <activity
             android:name=".AddRecordActivity"
             android:exported="false"
@@ -56,6 +89,8 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="camera" />
+        <!-- 注意：AI分析页面现在通过Fragment在MainActivity中显示 -->
+        <!-- 不需要单独的Activity声明 -->
 
     </application>
 

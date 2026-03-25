@@ -26,6 +26,9 @@ object RetrofitClient {
                 .build()
             chain.proceed(request)
         }
+    private const val BASE_URL = "http://10.0.2.2:8080/api/"  // 替换为实际的API地址
+
+    private val client = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
