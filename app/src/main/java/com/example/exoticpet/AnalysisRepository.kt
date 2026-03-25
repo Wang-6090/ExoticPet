@@ -3,25 +3,18 @@ package com.example.exoticpet.repository
 import android.graphics.Bitmap
 import android.util.Base64
 import android.util.Log
-import com.example.exoticpet.api.*
-import com.example.exoticpet.models.Pet
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
-import org.json.JSONArray
-import org.json.JSONObject
 import com.example.exoticpet.api.AnalysisResult
+import com.example.exoticpet.api.QwenVLContent
+import com.example.exoticpet.api.QwenVLInput
+import com.example.exoticpet.api.QwenVLMessage
+import com.example.exoticpet.api.QwenVLRequest
+import com.example.exoticpet.api.QwenVLResponse
 import com.example.exoticpet.api.RetrofitClient
 import com.example.exoticpet.models.Pet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
 import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
 
 class AnalysisRepository {
 
@@ -45,7 +38,7 @@ class AnalysisRepository {
             val analysisText = callQwenVLAPI(imageDataUrl, prompt)
             Log.d(TAG, "API返回: $analysisText")
 
-            val result = parseAnalysisResult(analysisText, type)
+            val result = parseAnalysisResult(analysisText)
 
             Result.success(result)
         } catch (e: Exception) {
@@ -73,68 +66,48 @@ class AnalysisRepository {
             )
         )
 
-        Log.d(TAG, "开始调用API...")
-
         val response = api.analyzeWithQwenVL(
             authorization = "Bearer ${RetrofitClient.DASHSCOPE_API_KEY}",
             request = request
         )
 
-        Log.d(TAG, "API响应码: ${response.code()}")
-
-        return if (response.isSuccessful) {
+        if (response.isSuccessful) {
             val body = response.body()
-            Log.d(TAG, "响应体: $body")
 
             if (body?.code != null && body.code != "200" && body.code != "success") {
                 throw Exception("API错误: ${body.code} - ${body.message}")
             }
 
-            // ✅ 关键修复：解析 content（可能是字符串或数组）
             val content = extractContentFromResponse(body)
-            if (content.isNullOrEmpty()) {
+            if (content.isBlank()) {
                 throw Exception("API返回内容为空")
             }
-            content
+            return content
         } else {
             val errorBody = response.errorBody()?.string()
-            Log.e(TAG, "HTTP错误: ${response.code()}, 错误体: $errorBody")
             throw Exception("API调用失败: ${response.code()} - $errorBody")
         }
     }
 
-    /**
-     * ✅ 新增：从响应中提取 content 内容
-     * 处理 content 可能是字符串或数组的情况
-     */
     private fun extractContentFromResponse(response: QwenVLResponse?): String {
         val message = response?.output?.choices?.firstOrNull()?.message ?: return ""
 
         return when (val content = message.content) {
-            is String -> {
-                // 如果是字符串，直接返回
-                content
-            }
+            is String -> content
             is List<*> -> {
-                // 如果是数组，提取所有 text 字段拼接
-                val stringBuilder = StringBuilder()
+                val sb = StringBuilder()
                 content.forEach { item ->
                     when (item) {
                         is Map<*, *> -> {
                             val text = item["text"] as? String
-                            if (!text.isNullOrEmpty()) {
-                                stringBuilder.append(text)
-                            }
+                            if (!text.isNullOrEmpty()) sb.append(text)
                         }
-                        is String -> {
-                            stringBuilder.append(item)
-                        }
+                        is String -> sb.append(item)
                     }
                 }
-                stringBuilder.toString()
+                sb.toString()
             }
             else -> {
-                // 其他情况，尝试转成 JSON 再解析
                 try {
                     val json = JSONObject(content.toString())
                     json.optString("text", content.toString())
@@ -146,7 +119,8 @@ class AnalysisRepository {
     }
 
     private fun buildPromptByType(type: String, pet: Pet): String {
-        val petInfo = "宠物信息：${pet.name}，种类：${pet.species}，年龄：${pet.birthDate}，体重：${pet.weight}g，体长：${pet.length}cm"
+        val petInfo =
+            "宠物信息：${pet.name}，种类：${pet.species}，年龄：${pet.birthDate}，体重：${pet.weight}g，体长：${pet.length}cm"
 
         return when (type) {
             "health" -> """
@@ -162,11 +136,11 @@ class AnalysisRepository {
                 请严格按以下JSON格式回答，只返回JSON，不要有其他内容：
                 {
                     "status": "健康/需要注意/紧急",
-                    "score": 0-100的评分,
-                    "analysis": "详细分析结果（100字内）",
-                    "suggestions": "饲养建议（80字内）",
-                    "warnings": "注意事项（50字内）",
-                    "confidence": 置信度0-1
+                    "score": 0,
+                    "analysis": "详细分析结果",
+                    "suggestions": "饲养建议",
+                    "warnings": "注意事项",
+                    "confidence": 0.0
                 }
             """.trimIndent()
 
@@ -182,11 +156,11 @@ class AnalysisRepository {
                 请严格按以下JSON格式回答，只返回JSON，不要有其他内容：
                 {
                     "status": "正常/活跃/异常",
-                    "score": 0-100的行为评分,
-                    "analysis": "行为分析（100字内）",
-                    "suggestions": "行为引导建议（80字内）",
-                    "warnings": "注意事项（50字内）",
-                    "confidence": 置信度0-1
+                    "score": 0,
+                    "analysis": "行为分析",
+                    "suggestions": "行为引导建议",
+                    "warnings": "注意事项",
+                    "confidence": 0.0
                 }
             """.trimIndent()
 
@@ -202,28 +176,28 @@ class AnalysisRepository {
                 请严格按以下JSON格式回答，只返回JSON，不要有其他内容：
                 {
                     "status": "正常/需改善/异常",
-                    "score": 0-100的饮食评分,
-                    "analysis": "饮食分析（100字内）",
-                    "suggestions": "饮食建议（80字内）",
-                    "warnings": "注意事项（50字内）",
-                    "confidence": 置信度0-1
+                    "score": 0,
+                    "analysis": "饮食分析",
+                    "suggestions": "饮食建议",
+                    "warnings": "注意事项",
+                    "confidence": 0.0
                 }
             """.trimIndent()
         }
     }
 
-    private fun parseAnalysisResult(aiResponse: String, type: String): AnalysisResult {
+    private fun parseAnalysisResult(aiResponse: String): AnalysisResult {
         return try {
             var cleanedResponse = aiResponse.trim()
+
             if (cleanedResponse.startsWith("```json")) {
                 cleanedResponse = cleanedResponse.removePrefix("```json").removeSuffix("```").trim()
             } else if (cleanedResponse.startsWith("```")) {
                 cleanedResponse = cleanedResponse.removePrefix("```").removeSuffix("```").trim()
             }
 
-            Log.d(TAG, "清理后的响应: $cleanedResponse")
+            val json = JSONObject(cleanedResponse)
 
-            val json = org.json.JSONObject(cleanedResponse)
             AnalysisResult(
                 status = json.optString("status", "分析完成"),
                 score = json.optInt("score", 80),
@@ -234,7 +208,6 @@ class AnalysisRepository {
                 timestamp = System.currentTimeMillis()
             )
         } catch (e: Exception) {
-            Log.e(TAG, "JSON解析失败", e)
             AnalysisResult(
                 status = "分析完成",
                 score = 75,
@@ -252,54 +225,5 @@ class AnalysisRepository {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
         val bytes = stream.toByteArray()
         return Base64.encodeToString(bytes, Base64.NO_WRAP)
-
-    // 分析图片
-    suspend fun analyzeImage(
-        bitmap: Bitmap,
-        type: String,
-        pet: Pet
-    ): Result<AnalysisResult> = withContext(Dispatchers.IO) {
-        try {
-            // 将Bitmap转换为文件
-            val file = bitmapToFile(bitmap)
-
-            // 创建MultipartBody.Part
-            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val imagePart = MultipartBody.Part.createFormData("image", file.name, requestFile)
-
-            // 创建petInfo
-            val petInfo = """
-                {
-                    "name": "${pet.name}",
-                    "species": "${pet.species}",
-                    "age": "${pet.birthDate}",
-                    "weight": ${pet.weight},
-                    "length": ${pet.length}
-                }
-            """.trimIndent()
-
-            val typeBody = type.toRequestBody("text/plain".toMediaTypeOrNull())
-            val petInfoBody = petInfo.toRequestBody("text/plain".toMediaTypeOrNull())
-
-            // 调用API
-            val response = api.analyzePetImage(imagePart, type, petInfo)
-
-            if (response.isSuccessful) {
-                Result.success(response.body()!!)
-            } else {
-                Result.failure(Exception("API调用失败: ${response.code()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    // Bitmap转File
-    private fun bitmapToFile(bitmap: Bitmap): File {
-        val file = File.createTempFile("temp_image", ".jpg")
-        file.outputStream().use { out ->
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out)
-        }
-        return file
     }
 }

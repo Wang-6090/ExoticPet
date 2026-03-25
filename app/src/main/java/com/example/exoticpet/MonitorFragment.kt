@@ -4,15 +4,24 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.os.Bundle
 import android.util.Log
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import androidx.camera.core.*
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.Switch
+import android.widget.TextView
+import android.widget.Toast
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -23,7 +32,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -60,23 +70,6 @@ class MonitorFragment : Fragment() {
     companion object {
         private const val REQUEST_CAMERA_PERMISSION = 1001
     }
-import androidx.cardview.widget.CardView
-import androidx.fragment.app.Fragment
-
-class MonitorFragment : Fragment() {
-
-    private lateinit var switchMonitoring: Switch
-    private lateinit var tvStatus: TextView
-    private lateinit var tvTemperature: TextView
-    private lateinit var tvHumidity: TextView
-    private lateinit var tvActivity: TextView
-    private lateinit var progressBarTemp: ProgressBar
-    private lateinit var progressBarHumidity: ProgressBar
-    private lateinit var btnSettings: ImageView
-    private lateinit var alertCard: CardView
-    private lateinit var tvAlertMessage: TextView
-    private lateinit var btnDismissAlert: Button
-    private lateinit var alertCardLayout: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -89,10 +82,6 @@ class MonitorFragment : Fragment() {
         initData()
         setupClickListeners()
         checkCameraPermission()
-        val view = inflater.inflate(R.layout.fragment_monitor, container, false)
-
-        initViews(view)
-        setupClickListeners()
 
         return view
     }
@@ -112,24 +101,22 @@ class MonitorFragment : Fragment() {
         spinnerInterval = view.findViewById(R.id.spinnerInterval)
         btnTakeSnapshot = view.findViewById(R.id.btnTakeSnapshot)
 
-        // 设置监控间隔选项
         val intervals = arrayOf("1分钟", "5分钟", "10分钟", "30分钟", "1小时")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, intervals)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerInterval.adapter = adapter
-        spinnerInterval.setSelection(1) // 默认5分钟
+        spinnerInterval.setSelection(1)
 
-        // 初始状态
         tvLastAnalysis.text = "暂无分析结果"
         alertCard.visibility = View.GONE
     }
 
     private fun initData() {
         dbHelper = PetDatabase(requireContext())
-        analysisViewModel = androidx.lifecycle.ViewModelProvider(requireActivity())[AnalysisViewModel::class.java]
+        analysisViewModel =
+            androidx.lifecycle.ViewModelProvider(requireActivity())[AnalysisViewModel::class.java]
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        // 观察分析结果
         analysisViewModel.analysisResult.observe(viewLifecycleOwner) { result ->
             result?.let {
                 val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
@@ -150,26 +137,6 @@ class MonitorFragment : Fragment() {
                 tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
             }
         }
-        switchMonitoring = view.findViewById(R.id.switchMonitoring)
-        tvStatus = view.findViewById(R.id.tvStatus)
-        tvTemperature = view.findViewById(R.id.tvTemperature)
-        tvHumidity = view.findViewById(R.id.tvHumidity)
-        tvActivity = view.findViewById(R.id.tvActivity)
-        progressBarTemp = view.findViewById(R.id.progressBarTemp)
-        progressBarHumidity = view.findViewById(R.id.progressBarHumidity)
-        btnSettings = view.findViewById(R.id.btnSettings)
-        alertCard = view.findViewById(R.id.alertCard)
-        tvAlertMessage = view.findViewById(R.id.tvAlertMessage)
-        btnDismissAlert = view.findViewById(R.id.btnDismissAlert)
-        alertCardLayout = view.findViewById(R.id.alertCardLayout)
-
-        tvTemperature.text = "【温度数据】"
-        tvHumidity.text = "【湿度数据】"
-        tvActivity.text = "【活动状态】"
-        tvAlertMessage.text = "【此处用于输出警报信息】"
-
-        progressBarTemp.progress = 0
-        progressBarHumidity.progress = 0
     }
 
     private fun setupClickListeners() {
@@ -187,30 +154,6 @@ class MonitorFragment : Fragment() {
 
         btnSettings.setOnClickListener {
             showIntervalDialog()
-                tvStatus.text = "监控中"
-                tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
-                Toast.makeText(requireContext(), "监控已开启", Toast.LENGTH_SHORT).show()
-
-                tvTemperature.text = "28°C"
-                tvHumidity.text = "55%"
-                tvActivity.text = "轻微活动"
-                progressBarTemp.progress = 60
-                progressBarHumidity.progress = 50
-            } else {
-                tvStatus.text = "已停止"
-                tvStatus.setTextColor(android.graphics.Color.parseColor("#F44336"))
-                Toast.makeText(requireContext(), "监控已关闭", Toast.LENGTH_SHORT).show()
-
-                tvTemperature.text = "【温度数据】"
-                tvHumidity.text = "【湿度数据】"
-                tvActivity.text = "【活动状态】"
-                progressBarTemp.progress = 0
-                progressBarHumidity.progress = 0
-            }
-        }
-
-        btnSettings.setOnClickListener {
-            Toast.makeText(requireContext(), "设置界面（可配置监控参数）", Toast.LENGTH_SHORT).show()
         }
 
         btnDismissAlert.setOnClickListener {
@@ -238,7 +181,6 @@ class MonitorFragment : Fragment() {
         tvStatus.text = "监控中"
         tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
 
-        // 启动定时任务
         monitorJob = lifecycleScope.launch {
             while (isMonitoring) {
                 takeSnapshotAndAnalyze()
@@ -270,7 +212,6 @@ class MonitorFragment : Fragment() {
             return
         }
 
-        // 设置输出目录
         val outputDir = File(requireContext().cacheDir, "snapshots")
         if (!outputDir.exists()) {
             outputDir.mkdirs()
@@ -286,10 +227,8 @@ class MonitorFragment : Fragment() {
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    // 图片保存成功，加载并分析
                     val bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
                     if (bitmap != null) {
-                        // 旋转图片到正确方向
                         val rotatedBitmap = rotateBitmapIfNeeded(bitmap)
                         analyzeImage(rotatedBitmap)
                     } else {
@@ -309,7 +248,6 @@ class MonitorFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val pet = dbHelper.getPet()
-                // 压缩图片以减少上传大小
                 val compressedBitmap = compressBitmap(bitmap)
                 analysisViewModel.analyzeImage(compressedBitmap, pet)
             } catch (e: Exception) {
@@ -319,7 +257,7 @@ class MonitorFragment : Fragment() {
     }
 
     private fun compressBitmap(bitmap: Bitmap): Bitmap {
-        val maxSize = 1024 // 最大边长1024px
+        val maxSize = 1024
         val width = bitmap.width
         val height = bitmap.height
 
@@ -338,8 +276,6 @@ class MonitorFragment : Fragment() {
     }
 
     private fun rotateBitmapIfNeeded(bitmap: Bitmap): Bitmap {
-        // 根据相机方向旋转（这里简化处理）
-        // 实际应用中需要根据相机传感器方向进行旋转
         return bitmap
     }
 
@@ -347,7 +283,6 @@ class MonitorFragment : Fragment() {
         tvAlertMessage.text = message
         alertCard.visibility = View.VISIBLE
 
-        // 5秒后自动隐藏
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             if (alertCard.visibility == View.VISIBLE) {
                 alertCard.visibility = View.GONE
@@ -392,16 +327,13 @@ class MonitorFragment : Fragment() {
         cameraProviderFuture.addListener({
             cameraProvider = cameraProviderFuture.get()
 
-            // 预览
             val preview = Preview.Builder().build()
             preview.setSurfaceProvider(previewView.surfaceProvider)
 
-            // 图像捕获
             imageCapture = ImageCapture.Builder()
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
 
-            // 选择相机
             cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
@@ -439,11 +371,5 @@ class MonitorFragment : Fragment() {
         cameraProvider?.unbindAll()
         cameraExecutor.shutdown()
         monitorJob?.cancel()
-
-        alertCardLayout.setOnLongClickListener {
-            alertCard.visibility = View.VISIBLE
-            tvAlertMessage.text = "【示例警报】温度过高，请注意"
-            true
-        }
     }
 }

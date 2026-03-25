@@ -8,27 +8,13 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    // ✅ 修复：BASE_URL 应该是基础域名
-    private const val BASE_URL = "https://dashscope.aliyuncs.com/"
+    // 本地后端地址：登录/注册/历史等走这里
+    private const val BASE_URL = "http://10.0.2.2:8080/api/"
 
-    // 🔑 你的 API Key
-    const val DASHSCOPE_API_KEY = "sk-53be77a68ea04447a1b74eb48aaca505"
+    // 把这里替换成你自己的 DashScope Key
+    const val DASHSCOPE_API_KEY = "你的_DashScope_API_Key"
 
-    var useOpenAICompatible = false
-
-    private val client = OkHttpClient.Builder()
-        .addInterceptor { chain ->
-            val original = chain.request()
-            val request = original.newBuilder()
-                .header("Authorization", "Bearer $DASHSCOPE_API_KEY")
-                .header("Content-Type", "application/json")
-                .method(original.method, original.body)
-                .build()
-            chain.proceed(request)
-        }
-    private const val BASE_URL = "http://10.0.2.2:8080/api/"  // 替换为实际的API地址
-
-    private val client = OkHttpClient.Builder()
+    private val client: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
