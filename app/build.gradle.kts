@@ -62,4 +62,18 @@ dependencies {
 
     // Image loading (可选)
     implementation("io.coil-kt:coil:2.4.0")
+
+    // Gson (如果还没添加)
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // CameraX
+    val cameraxVersion = "1.4.0"
+    implementation("androidx.camera:camera-core:${cameraxVersion}")
+    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
+    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
+    implementation("androidx.camera:camera-view:${cameraxVersion}")
+
+    // WorkManager for background tasks
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
 }

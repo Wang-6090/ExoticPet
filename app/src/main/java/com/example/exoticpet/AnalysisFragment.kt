@@ -1,3 +1,9 @@
+package com.example.exoticpet
+
+import android.Manifest
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.os.Build
 //package com.example.exoticpet
 //
 //import android.net.Uri
@@ -95,11 +101,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.example.exoticpet.viewmodel.AnalysisViewModel
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.exoticpet.viewmodel.AnalysisViewModel
@@ -127,6 +138,19 @@ class AnalysisFragment : Fragment() {
     private lateinit var dbHelper: PetDatabase
     private var currentImageBitmap: Bitmap? = null
 
+    // 权限请求启动器
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            // 权限都允许了，打开相册
+            openGallery()
+        } else {
+            Toast.makeText(requireContext(), "需要存储权限才能选择图片", Toast.LENGTH_LONG).show()
+        }
+    }
+
     private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
         bitmap?.let {
             currentImageBitmap = it
@@ -147,6 +171,7 @@ class AnalysisFragment : Fragment() {
                 btnAnalyze.isEnabled = true
                 viewModel.clearResult()
             } catch (e: Exception) {
+                Toast.makeText(requireContext(), "图片加载失败: ${e.message}", Toast.LENGTH_SHORT).show()
                 Toast.makeText(requireContext(), "图片加载失败", Toast.LENGTH_SHORT).show()
             }
         }
@@ -159,6 +184,17 @@ class AnalysisFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_analysis, container, false)
 
+        try {
+            dbHelper = PetDatabase(requireContext())
+            viewModel = ViewModelProvider(this)[AnalysisViewModel::class.java]
+
+            initViews(view)
+            setupClickListeners()
+            observeViewModel()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(requireContext(), "初始化失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
         dbHelper = PetDatabase(requireContext())
         viewModel = ViewModelProvider(this)[AnalysisViewModel::class.java]
 
@@ -191,6 +227,13 @@ class AnalysisFragment : Fragment() {
 
     private fun setupClickListeners() {
         btnTakePhoto.setOnClickListener {
+            // 拍照需要相机权限
+            checkCameraPermission()
+        }
+
+        btnChooseFromGallery.setOnClickListener {
+            // 选择图片需要存储权限
+            checkStoragePermission()
             takePhotoLauncher.launch(null)
         }
 
@@ -200,6 +243,14 @@ class AnalysisFragment : Fragment() {
 
         btnAnalyze.setOnClickListener {
             if (currentImageBitmap != null) {
+                try {
+                    val pet = dbHelper.getPet()
+                    viewModel.analyzeImage(currentImageBitmap!!, pet)
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "获取宠物信息失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(requireContext(), "请先选择图片", Toast.LENGTH_SHORT).show()
                 val pet = dbHelper.getPet()
                 viewModel.analyzeImage(currentImageBitmap!!, pet)
             }
@@ -219,6 +270,61 @@ class AnalysisFragment : Fragment() {
             updateSelectedTab(tabDiet)
             viewModel.setAnalysisType("diet")
         }
+    }
+
+    // 检查存储权限
+    private fun checkStoragePermission() {
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ 使用新的图片权限
+            arrayOf(
+                Manifest.permission.READ_MEDIA_IMAGES
+            )
+        } else {
+            // Android 12 及以下
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        }
+
+        val allGranted = permissions.all {
+            ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
+        }
+
+        if (allGranted) {
+            openGallery()
+        } else {
+            requestPermissionLauncher.launch(permissions)
+        }
+    }
+
+    // 检查相机权限
+    private fun checkCameraPermission() {
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_MEDIA_IMAGES
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        }
+
+        val allGranted = permissions.all {
+            ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
+        }
+
+        if (allGranted) {
+            takePhotoLauncher.launch(null)
+        } else {
+            requestPermissionLauncher.launch(permissions)
+        }
+    }
+
+    // 打开相册
+    private fun openGallery() {
+        pickImageLauncher.launch("image/*")
     }
 
     private fun updateSelectedTab(selectedTab: LinearLayout) {

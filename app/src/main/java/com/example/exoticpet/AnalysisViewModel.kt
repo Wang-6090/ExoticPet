@@ -14,6 +14,15 @@ class AnalysisViewModel : ViewModel() {
 
     private val repository = AnalysisRepository()
 
+    private val _analysisResult = MutableLiveData<AnalysisResult?>()
+    val analysisResult: LiveData<AnalysisResult?> = _analysisResult
+
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
+
     // 分析结果
     private val _analysisResult = MutableLiveData<AnalysisResult?>()
     val analysisResult: LiveData<AnalysisResult?> = _analysisResult
@@ -34,6 +43,12 @@ class AnalysisViewModel : ViewModel() {
         _analysisType.value = type
     }
 
+    fun analyzeImage(bitmap: Bitmap, pet: Pet) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                _error.value = null
+
     // 分析图片
     fun analyzeImage(bitmap: Bitmap, pet: Pet) {
         viewModelScope.launch {
@@ -45,6 +60,13 @@ class AnalysisViewModel : ViewModel() {
 
                 result.onSuccess { analysisResult ->
                     _analysisResult.value = analysisResult
+                }.onFailure { exception ->
+                    _error.value = "分析失败: ${exception.message}"
+                    exception.printStackTrace()
+                }
+            } catch (e: Exception) {
+                _error.value = "异常: ${e.message}"
+                e.printStackTrace()
                     // 保存到数据库（可选）
                     saveAnalysisToDatabase(analysisResult)
                 }.onFailure { exception ->
