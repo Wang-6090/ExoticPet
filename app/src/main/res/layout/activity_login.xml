@@ -45,6 +45,6 @@
         android:layout_height="wrap_content"
         android:text="没有账号？去注册"
         android:textSize="16sp"
-        android:textColor="#1976D2" />
+        android:textColor="@color/link_color" />
 
 </LinearLayout>

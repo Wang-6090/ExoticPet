@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/page_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
                 android:text="实时监控"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#333333" />
+                android:textColor="@color/text_primary" />
 
             <ImageView
                 android:id="@+id/btnSettings"
@@ -63,7 +63,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="已停止"
-                    android:textColor="#F44336"
+                    android:textColor="@color/status_error"
                     android:layout_marginEnd="16dp" />
 
                 <Switch
@@ -121,7 +121,7 @@
                             android:layout_height="wrap_content"
                             android:text="【温度数据】"
                             android:textSize="16sp"
-                            android:textColor="#666666" />
+                            android:textColor="@color/text_secondary" />
                     </LinearLayout>
 
                     <ProgressBar
@@ -131,7 +131,7 @@
                         android:layout_height="20dp"
                         android:progress="0"
                         android:max="100"
-                        android:progressTint="#FF9800" />
+                        android:progressTint="@color/brand_primary" />
                 </LinearLayout>
 
                 <!-- 湿度 -->
@@ -160,7 +160,7 @@
                             android:layout_height="wrap_content"
                             android:text="【湿度数据】"
                             android:textSize="16sp"
-                            android:textColor="#666666" />
+                            android:textColor="@color/text_secondary" />
                     </LinearLayout>
 
                     <ProgressBar
@@ -170,7 +170,7 @@
                         android:layout_height="20dp"
                         android:progress="0"
                         android:max="100"
-                        android:progressTint="#2196F3" />
+                        android:progressTint="@color/brand_secondary" />
                 </LinearLayout>
 
                 <!-- 活动状态 -->
@@ -192,7 +192,7 @@
                         android:layout_height="wrap_content"
                         android:text="【活动状态】"
                         android:textSize="16sp"
-                        android:textColor="#666666" />
+                        android:textColor="@color/text_secondary" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -213,7 +213,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp"
-                android:background="#FFEBEE">
+                android:background="@color/status_error_bg">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -221,7 +221,7 @@
                     android:text="⚠️ 实时警报"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="#F44336"
+                    android:textColor="@color/status_error"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
@@ -230,7 +230,7 @@
                     android:layout_height="wrap_content"
                     android:text="【此处用于输出警报信息】"
                     android:textSize="16sp"
-                    android:textColor="#666666"
+                    android:textColor="@color/text_secondary"
                     android:layout_marginBottom="16dp" />
 
                 <Button
@@ -238,7 +238,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
                     android:text="忽略"
-                    android:backgroundTint="#F44336" />
+                    android:backgroundTint="@color/status_error" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -319,7 +319,7 @@
                     android:layout_height="wrap_content"
                     android:text="【此处用于输出行为分析结果】"
                     android:textSize="14sp"
-                    android:textColor="#666666"
+                    android:textColor="@color/text_secondary"
                     android:layout_marginBottom="8dp" />
 
                 <TextView
@@ -327,7 +327,7 @@
                     android:layout_height="wrap_content"
                     android:text="【此处用于输出行为建议】"
                     android:textSize="14sp"
-                    android:textColor="#666666" />
+                    android:textColor="@color/text_secondary" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

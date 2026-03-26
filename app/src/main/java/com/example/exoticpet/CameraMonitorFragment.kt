@@ -124,11 +124,9 @@ class CameraMonitorFragment : Fragment() {
         analysisViewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             if (isLoading) {
                 tvStatus.text = "分析中..."
-                tvStatus.setTextColor(android.graphics.Color.parseColor("#FF9800"))
-            } else if (isMonitoring) {
+                tvStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.status_warning))            } else if (isMonitoring) {
                 tvStatus.text = "监控中"
-                tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
-            }
+                tvStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.status_success))            }
         }
     }
 
@@ -172,8 +170,7 @@ class CameraMonitorFragment : Fragment() {
         }
 
         tvStatus.text = "监控中"
-        tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
-
+        tvStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.status_success))
         // 启动定时任务
         monitorJob = lifecycleScope.launch {
             while (isMonitoring) {
@@ -190,8 +187,7 @@ class CameraMonitorFragment : Fragment() {
         monitorJob?.cancel()
 
         tvStatus.text = "已停止"
-        tvStatus.setTextColor(android.graphics.Color.parseColor("#F44336"))
-
+        tvStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.status_error))
         Toast.makeText(requireContext(), "监控已停止", Toast.LENGTH_SHORT).show()
     }
 

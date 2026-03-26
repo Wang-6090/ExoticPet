@@ -24,6 +24,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.util.Log
+import androidx.core.content.ContextCompat
 
 class HomeFragment : Fragment() {
 
@@ -101,7 +103,10 @@ class HomeFragment : Fragment() {
 
     private fun loadPetData() {
         val userId = UserSession.getUserId(requireContext())
-        if (userId == 0) return
+        if (userId == 0) {
+            showEmptyPetState()
+            return
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -110,23 +115,33 @@ class HomeFragment : Fragment() {
 
                 if (response.isSuccessful && pet != null) {
                     tvName.text = pet.name
-                    tvSpecies.text = "${pet.species} | 年龄：${calculateAge(pet.birthDate ?: "")}"
-                    tvLength.text = "体长：${pet.length ?: 0.0}cm"
-                    tvWeight.text = "体重：${pet.weight ?: 0.0}g"
-                    tvHealthScore.text = "最新分析：${pet.healthScore ?: 0}分"
-                    tvLastCheckup.text = "上次体检：${pet.lastCheckup ?: "暂无"}"
-                    setupGrowthChart(pet.weight?.toFloat() ?: 0f)
+
+                    val speciesParts = mutableListOf<String>()
+                    if (pet.species.isNotBlank()) {
+                        speciesParts.add(pet.species)
+                    }
+                    if (!pet.birthDate.isNullOrBlank()) {
+                        speciesParts.add("年龄：${calculateAge(pet.birthDate)}")
+                    }
+                    tvSpecies.text = speciesParts.joinToString(" | ")
+
+                    tvLength.text = pet.length?.takeIf { it > 0 }?.let { "体长：${it}cm" }.orEmpty()
+                    tvWeight.text = pet.weight?.takeIf { it > 0 }?.let { "体重：${it}g" }.orEmpty()
+                    tvHealthScore.text = pet.healthScore?.takeIf { it > 0 }?.let { "最新分析：${it}分" }.orEmpty()
+                    tvLastCheckup.text = pet.lastCheckup?.takeIf { it.isNotBlank() }?.let { "上次体检：$it" }.orEmpty()
+
+                    if ((pet.weight ?: 0.0) > 0) {
+                        setupGrowthChart((pet.weight ?: 0.0).toFloat())
+                    } else {
+                        lineChart.clear()
+                        lineChart.invalidate()
+                    }
                 } else {
-                    tvName.text = "还未建档"
-                    tvSpecies.text = "请先填写宠物问卷"
-                    tvLength.text = "体长：--"
-                    tvWeight.text = "体重：--"
-                    tvHealthScore.text = "最新分析：暂无"
-                    tvLastCheckup.text = "上次体检：暂无"
-                    setupGrowthChart(0f)
+                    showEmptyPetState()
                 }
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "加载宠物档案失败：${e.message}", Toast.LENGTH_SHORT).show()
+                Log.w("HomeFragment", "未查询到宠物档案，首页显示空白状态", e)
+                showEmptyPetState()
             }
         }
     }
@@ -168,14 +183,25 @@ class HomeFragment : Fragment() {
         entries.add(Entry(3f, currentWeight))
 
         val dataSet = LineDataSet(entries, "体重趋势(g)")
-        dataSet.color = android.graphics.Color.parseColor("#FF9800")
-        dataSet.valueTextColor = android.graphics.Color.BLACK
+        dataSet.color = ContextCompat.getColor(requireContext(), R.color.chart_line)
+        dataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
         dataSet.lineWidth = 2f
         dataSet.setDrawCircles(true)
-        dataSet.setCircleColor(android.graphics.Color.parseColor("#FF9800"))
+        dataSet.setCircleColor(ContextCompat.getColor(requireContext(), R.color.chart_accent))
 
         lineChart.data = LineData(dataSet)
         lineChart.description.isEnabled = false
+        lineChart.invalidate()
+    }
+
+    private fun showEmptyPetState() {
+        tvName.text = ""
+        tvSpecies.text = ""
+        tvLength.text = ""
+        tvWeight.text = ""
+        tvHealthScore.text = ""
+        tvLastCheckup.text = ""
+        lineChart.clear()
         lineChart.invalidate()
     }
 

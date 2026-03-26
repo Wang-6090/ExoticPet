@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.exoticpet.api.PetProfileRequest
 import com.example.exoticpet.api.BackendRetrofitClient
 import kotlinx.coroutines.launch
+import android.util.Log
 
 class EditPetActivity : AppCompatActivity() {
 
@@ -52,21 +53,43 @@ class EditPetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = BackendRetrofitClient.instance.getMyPet(userId)
-                val pet = response.body() ?: return@launch
+                val pet = response.body()
+
+                if (!response.isSuccessful || pet == null) {
+                    clearInputs()
+                    return@launch
+                }
 
                 etName.setText(pet.name)
                 etSpecies.setText(pet.species)
                 etGender.setText(pet.gender ?: "")
                 etBirthDate.setText(pet.birthDate ?: "")
-                etLength.setText((pet.length ?: 0.0).toString())
-                etWeight.setText((pet.weight ?: 0.0).toString())
+                etLength.setText(
+                    pet.length?.takeIf { it > 0 }?.toString() ?: ""
+                )
+                etWeight.setText(
+                    pet.weight?.takeIf { it > 0 }?.toString() ?: ""
+                )
                 etSpecialMark.setText(pet.specialMark ?: "")
                 etEnclosureSize.setText(pet.enclosureSize ?: "")
                 etStapleFood.setText(pet.stapleFood ?: "")
             } catch (e: Exception) {
-                Toast.makeText(this@EditPetActivity, "加载宠物信息失败：${e.message}", Toast.LENGTH_SHORT).show()
+                Log.w("EditPetActivity", "未查询到宠物档案，编辑页显示空表单", e)
+                clearInputs()
             }
         }
+    }
+
+    private fun clearInputs() {
+        etName.setText("")
+        etSpecies.setText("")
+        etGender.setText("")
+        etBirthDate.setText("")
+        etLength.setText("")
+        etWeight.setText("")
+        etSpecialMark.setText("")
+        etEnclosureSize.setText("")
+        etStapleFood.setText("")
     }
 
     private fun setupClickListeners() {

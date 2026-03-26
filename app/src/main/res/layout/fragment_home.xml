@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/page_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,7 +23,7 @@
                 android:text="我的异宠档案"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#333333" />
+                android:textColor="@color/text_primary" />
 
             <ImageView
                 android:id="@+id/btnLogout"
@@ -70,7 +70,7 @@
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:src="@android:drawable/sym_def_app_icon"
-                        android:background="#E0E0E0"
+                        android:background="@color/divider_soft"
                         android:padding="8dp" />
 
                     <LinearLayout
@@ -84,7 +84,7 @@
                             android:id="@+id/tvName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="橙橙"
+                            android:text=""
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -92,9 +92,9 @@
                             android:id="@+id/tvSpecies"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="鬃狮蜥 | 年龄：6个月"
+                            android:text=""
                             android:textSize="14sp"
-                            android:textColor="#666666" />
+                            android:textColor="@color/text_secondary" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -109,7 +109,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="体长：28cm"
+                        android:text=""
                         android:textSize="16sp" />
 
                     <TextView
@@ -117,7 +117,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="体重：125g"
+                        android:text=""
                         android:textSize="16sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -178,7 +178,7 @@
                     android:id="@+id/tvHealthScore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="最新分析：健康（92分）"
+                    android:text=""
                     android:textSize="14sp"
                     android:layout_marginBottom="4dp" />
 
@@ -186,7 +186,7 @@
                     android:id="@+id/tvLastCheckup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="上次体检：无异常"
+                    android:text=""
                     android:textSize="14sp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -231,7 +231,7 @@
             android:layout_height="56dp"
             android:text="➕ 新增记录"
             android:textSize="16sp"
-            android:backgroundTint="#FF9800" />
+            android:backgroundTint="@color/brand_primary" />
 
     </LinearLayout>
 </ScrollView>

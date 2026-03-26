@@ -20,7 +20,7 @@
             android:text="📅 2026-03-01"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#FF9800"
+            android:textColor="@color/brand_primary"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:text="• 建议：保持湿度50%以上"
             android:textSize="14sp"
-            android:textColor="#4CAF50" />
+            android:textColor="@color/status_success" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

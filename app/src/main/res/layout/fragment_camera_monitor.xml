@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="@color/page_background">
 
     <!-- 摄像头预览区域 -->
     <FrameLayout
@@ -25,7 +25,7 @@
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="16dp"
             android:text="手动截图分析"
-            android:backgroundTint="#FF9800"
+            android:backgroundTint="@color/brand_primary"
             android:textColor="@android:color/white" />
 
     </FrameLayout>
@@ -110,7 +110,7 @@
                 android:layout_height="wrap_content"
                 android:text="已停止"
                 android:textSize="14sp"
-                android:textColor="#F44336" />
+                android:textColor="@color/status_error" />
         </LinearLayout>
 
         <!-- 环境数据占位 -->
@@ -189,7 +189,7 @@
             android:text="暂无分析结果"
             android:textSize="12sp"
             android:padding="8dp"
-            android:background="#F5F5F5" />
+            android:background="@color/page_background" />
 
     </LinearLayout>
 
@@ -201,7 +201,7 @@
         android:orientation="horizontal"
         android:visibility="gone"
         android:padding="12dp"
-        android:background="#FFEBEE"
+        android:background="@color/status_error_bg"
         android:elevation="4dp">
 
         <TextView
@@ -218,14 +218,14 @@
             android:layout_weight="8"
             android:text="警告信息"
             android:textSize="14sp"
-            android:textColor="#D32F2F" />
+            android:textColor="@color/status_error" />
 
         <Button
             android:id="@+id/btnDismissAlert"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="关闭"
-            android:backgroundTint="#D32F2F"
+            android:backgroundTint="@color/brand_secondary"
             android:textSize="12sp"
             android:minHeight="32dp"
             android:paddingHorizontal="8dp" />

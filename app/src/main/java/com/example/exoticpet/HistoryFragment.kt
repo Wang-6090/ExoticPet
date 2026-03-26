@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.exoticpet.api.RecordDto
 import com.example.exoticpet.api.BackendRetrofitClient
 import kotlinx.coroutines.launch
+import androidx.core.content.ContextCompat
 
 class HistoryFragment : Fragment() {
 
@@ -69,8 +70,12 @@ class HistoryFragment : Fragment() {
     private fun updateFilter(filter: String, selectedButton: Button) {
         currentFilter = filter
 
-        val grayColor = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
-        val orangeColor = ColorStateList.valueOf(Color.parseColor("#FF9800"))
+        val grayColor = ColorStateList.valueOf(
+            ContextCompat.getColor(requireContext(), R.color.chip_unselected)
+        )
+        val orangeColor = ColorStateList.valueOf(
+            ContextCompat.getColor(requireContext(), R.color.brand_primary)
+        )
 
         btnAll.backgroundTintList = grayColor
         btnFeed.backgroundTintList = grayColor

@@ -46,6 +46,7 @@ class AnalysisFragment : Fragment() {
 
     private lateinit var viewModel: AnalysisViewModel
     private lateinit var dbHelper: PetDatabase
+    private lateinit var tvImagePlaceholder: TextView
     private var currentImageBitmap: Bitmap? = null
 
     private val requestPermissionLauncher = registerForActivityResult(
@@ -64,6 +65,7 @@ class AnalysisFragment : Fragment() {
             bitmap?.let {
                 currentImageBitmap = it
                 imageView.setImageBitmap(it)
+                showSelectedImage()
                 btnAnalyze.isEnabled = true
                 viewModel.clearResult()
             }
@@ -77,6 +79,7 @@ class AnalysisFragment : Fragment() {
                     val inputStream = requireContext().contentResolver.openInputStream(uri)
                     val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
                     currentImageBitmap = bitmap
+                    showSelectedImage()
                     btnAnalyze.isEnabled = true
                     viewModel.clearResult()
                 } catch (e: Exception) {
@@ -109,6 +112,7 @@ class AnalysisFragment : Fragment() {
 
     private fun initViews(view: View) {
         imageView = view.findViewById(R.id.imageView)
+        tvImagePlaceholder = view.findViewById(R.id.tvImagePlaceholder)
         btnTakePhoto = view.findViewById(R.id.btnTakePhoto)
         btnChooseFromGallery = view.findViewById(R.id.btnChooseFromGallery)
         btnAnalyze = view.findViewById(R.id.btnAnalyze)
@@ -125,6 +129,7 @@ class AnalysisFragment : Fragment() {
 
         btnAnalyze.isEnabled = false
         resultCard.visibility = View.GONE
+        showPlaceholder()
     }
 
     private fun setupClickListeners() {
@@ -213,12 +218,23 @@ class AnalysisFragment : Fragment() {
         pickImageLauncher.launch("image/*")
     }
 
+    private fun showPlaceholder() {
+        imageView.setImageDrawable(null)
+        imageView.visibility = View.GONE
+        tvImagePlaceholder.visibility = View.VISIBLE
+    }
+
+    private fun showSelectedImage() {
+        imageView.visibility = View.VISIBLE
+        tvImagePlaceholder.visibility = View.GONE
+    }
+
     private fun updateSelectedTab(selectedTab: LinearLayout) {
         val defaultBg = android.content.res.ColorStateList.valueOf(
-            android.graphics.Color.parseColor("#F5F5F5")
+            ContextCompat.getColor(requireContext(), R.color.surface_soft)
         )
         val selectedBg = android.content.res.ColorStateList.valueOf(
-            android.graphics.Color.parseColor("#FF9800")
+            ContextCompat.getColor(requireContext(), R.color.brand_primary)
         )
 
         tabHealth.backgroundTintList = defaultBg
@@ -285,9 +301,9 @@ class AnalysisFragment : Fragment() {
                 tvWarning.text = "注意事项：${it.warnings}"
 
                 val statusColor = when {
-                    it.score >= 75 -> android.graphics.Color.parseColor("#4CAF50")
-                    it.score >= 60 -> android.graphics.Color.parseColor("#FF9800")
-                    else -> android.graphics.Color.parseColor("#F44336")
+                    it.score >= 75 -> ContextCompat.getColor(requireContext(), R.color.status_success)
+                    it.score >= 60 -> ContextCompat.getColor(requireContext(), R.color.status_warning)
+                    else -> ContextCompat.getColor(requireContext(), R.color.status_error)
                 }
                 tvHealthStatus.setTextColor(statusColor)
 

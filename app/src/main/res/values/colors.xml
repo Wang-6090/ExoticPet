@@ -1,5 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 基础色 -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- 页面 / 卡片 -->
+    <color name="page_background">#F7F9FC</color>
+    <color name="card_background">#FFFDFE</color>
+    <color name="surface_soft">#EEF4F8</color>
+    <color name="divider_soft">#DCE6F0</color>
+
+    <!-- 主品牌色：低饱和淡蓝 / 淡粉 / 淡紫 -->
+    <color name="brand_primary">#9FBFDE</color>
+    <color name="brand_secondary">#E5BDD0</color>
+    <color name="brand_tertiary">#CFC3E6</color>
+    <color name="link_color">#7FA6CF</color>
+
+    <!-- 文本 -->
+    <color name="text_primary">#566273</color>
+    <color name="text_secondary">#8B95A4</color>
+
+    <!-- 导航 / 筛选 -->
+    <color name="nav_checked">#8FB3D7</color>
+    <color name="nav_unchecked">#A4ACB7</color>
+    <color name="chip_unselected">#C7D5E3</color>
+
+    <!-- 状态色（也压低饱和度） -->
+    <color name="status_success">#7FA58F</color>
+    <color name="status_warning">#B9966D</color>
+    <color name="status_error">#B98391</color>
+
+    <!-- 状态背景 -->
+    <color name="status_success_bg">#EEF6F1</color>
+    <color name="status_warning_bg">#FBF4EA</color>
+    <color name="status_error_bg">#FAEFF3</color>
+
+    <!-- 图表 -->
+    <color name="chart_line">#8FB3D7</color>
+    <color name="chart_accent">#D9AEC1</color>
 </resources>

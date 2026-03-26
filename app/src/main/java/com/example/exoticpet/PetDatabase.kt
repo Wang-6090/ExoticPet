@@ -7,10 +7,9 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.example.exoticpet.models.Pet
 import com.example.exoticpet.models.Record
 
-class PetDatabase(context: Context) : SQLiteOpenHelper(context, "PetDB", null, 1) {
+class PetDatabase(context: Context) : SQLiteOpenHelper(context, "PetDB", null, 2) {
 
     override fun onCreate(db: SQLiteDatabase) {
-        // 创建宠物表
         db.execSQL("""
             CREATE TABLE pets (
                 id INTEGER PRIMARY KEY,
@@ -28,7 +27,6 @@ class PetDatabase(context: Context) : SQLiteOpenHelper(context, "PetDB", null, 1
             )
         """)
 
-        // 创建记录表
         db.execSQL("""
             CREATE TABLE records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,10 +37,6 @@ class PetDatabase(context: Context) : SQLiteOpenHelper(context, "PetDB", null, 1
                 suggestion TEXT
             )
         """)
-
-        // 插入默认数据
-        insertDefaultPet(db)
-        insertSampleRecords(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -51,74 +45,36 @@ class PetDatabase(context: Context) : SQLiteOpenHelper(context, "PetDB", null, 1
         onCreate(db)
     }
 
-    private fun insertDefaultPet(db: SQLiteDatabase) {
-        val values = ContentValues().apply {
-            put("id", 1)
-            put("name", "橙橙")
-            put("species", "鬃狮蜥")
-            put("gender", "♂")
-            put("birthDate", "2025-09-01")
-            put("length", 28.0)
-            put("weight", 125.0)
-            put("specialMark", "无")
-            put("enclosureSize", "60*45*45cm")
-            put("stapleFood", "杜比亚蟑螂")
-            put("healthScore", 92)
-            put("lastCheckup", "无异常")
-        }
-        db.insert("pets", null, values)
-    }
-
-    private fun insertSampleRecords(db: SQLiteDatabase) {
-        val records = listOf(
-            ContentValues().apply {
-                put("date", "2026-03-01")
-                put("time", "14:30")
-                put("type", "蜕皮")
-                put("description", "完成一次完整蜕皮，腹部残留少量甲片")
-                put("suggestion", "保持湿度50%以上")
-            },
-            ContentValues().apply {
-                put("date", "2026-02-15")
-                put("time", "09:20")
-                put("type", "异常")
-                put("description", "拒食2天，精神萎靡")
-                put("suggestion", "升温至30℃，补充钙粉")
-            }
-        )
-
-        records.forEach { record ->
-            db.insert("records", null, record)
-        }
-    }
-
-    // 获取宠物信息
+    // 获取宠物信息：没有数据时返回空对象，而不是返回演示数据
     fun getPet(): Pet {
         val db = readableDatabase
         val cursor = db.rawQuery("SELECT * FROM pets WHERE id = 1", null)
         val pet = Pet()
 
         if (cursor.moveToFirst()) {
-            pet.name = cursor.getString(1)
-            pet.species = cursor.getString(2)
-            pet.gender = cursor.getString(3)
-            pet.birthDate = cursor.getString(4)
+            pet.id = cursor.getInt(0)
+            pet.name = cursor.getString(1) ?: ""
+            pet.species = cursor.getString(2) ?: ""
+            pet.gender = cursor.getString(3) ?: ""
+            pet.birthDate = cursor.getString(4) ?: ""
             pet.length = cursor.getDouble(5)
             pet.weight = cursor.getDouble(6)
-            pet.specialMark = cursor.getString(7)
-            pet.enclosureSize = cursor.getString(8)
-            pet.stapleFood = cursor.getString(9)
+            pet.specialMark = cursor.getString(7) ?: ""
+            pet.enclosureSize = cursor.getString(8) ?: ""
+            pet.stapleFood = cursor.getString(9) ?: ""
             pet.healthScore = cursor.getInt(10)
-            pet.lastCheckup = cursor.getString(11)
+            pet.lastCheckup = cursor.getString(11) ?: ""
         }
+
         cursor.close()
         return pet
     }
 
-    // 更新宠物信息
+    // 更新宠物信息：如果本地没有这条记录，就直接插入
     fun updatePet(pet: Pet): Boolean {
         val db = writableDatabase
         val values = ContentValues().apply {
+            put("id", 1)
             put("name", pet.name)
             put("species", pet.species)
             put("gender", pet.gender)
@@ -131,10 +87,15 @@ class PetDatabase(context: Context) : SQLiteOpenHelper(context, "PetDB", null, 1
             put("healthScore", pet.healthScore)
             put("lastCheckup", pet.lastCheckup)
         }
-        return db.update("pets", values, "id = 1", null) > 0
+
+        return db.insertWithOnConflict(
+            "pets",
+            null,
+            values,
+            SQLiteDatabase.CONFLICT_REPLACE
+        ) != -1L
     }
 
-    // 添加记录
     fun addRecord(record: Record): Long {
         val db = writableDatabase
         val values = ContentValues().apply {
@@ -147,7 +108,6 @@ class PetDatabase(context: Context) : SQLiteOpenHelper(context, "PetDB", null, 1
         return db.insert("records", null, values)
     }
 
-    // 获取所有记录
     fun getAllRecords(): List<Record> {
         val records = mutableListOf<Record>()
         val db = readableDatabase
@@ -164,11 +124,11 @@ class PetDatabase(context: Context) : SQLiteOpenHelper(context, "PetDB", null, 1
             )
             records.add(record)
         }
+
         cursor.close()
         return records
     }
 
-    // 按类型筛选记录
     fun getRecordsByType(type: String): List<Record> {
         if (type == "全部") return getAllRecords()
 
@@ -190,6 +150,7 @@ class PetDatabase(context: Context) : SQLiteOpenHelper(context, "PetDB", null, 1
             )
             records.add(record)
         }
+
         cursor.close()
         return records
     }
