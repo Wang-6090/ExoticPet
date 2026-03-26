@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.exoticpet.api.RecordRequest
-import com.example.exoticpet.api.RetrofitClient
+import com.example.exoticpet.api.BackendRetrofitClient
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -112,7 +112,7 @@ class AddRecordActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val userId = UserSession.getUserId(this@AddRecordActivity)
-                val response = RetrofitClient.instance.addManualRecord(
+                val response = BackendRetrofitClient.instance.addManualRecord(
                     RecordRequest(
                         userId = userId,
                         date = date,

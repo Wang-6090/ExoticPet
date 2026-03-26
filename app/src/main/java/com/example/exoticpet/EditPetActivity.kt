@@ -7,7 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.exoticpet.api.PetProfileRequest
-import com.example.exoticpet.api.RetrofitClient
+import com.example.exoticpet.api.BackendRetrofitClient
 import kotlinx.coroutines.launch
 
 class EditPetActivity : AppCompatActivity() {
@@ -51,7 +51,7 @@ class EditPetActivity : AppCompatActivity() {
         val userId = UserSession.getUserId(this)
         lifecycleScope.launch {
             try {
-                val response = RetrofitClient.instance.getMyPet(userId)
+                val response = BackendRetrofitClient.instance.getMyPet(userId)
                 val pet = response.body() ?: return@launch
 
                 etName.setText(pet.name)
@@ -105,7 +105,7 @@ class EditPetActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val userId = UserSession.getUserId(this@EditPetActivity)
-                val response = RetrofitClient.instance.saveMyPet(
+                val response = BackendRetrofitClient.instance.saveMyPet(
                     PetProfileRequest(
                         userId = userId,
                         name = etName.text.toString().trim(),

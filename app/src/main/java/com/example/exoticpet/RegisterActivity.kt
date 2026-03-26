@@ -8,7 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.exoticpet.api.RegisterRequest
-import com.example.exoticpet.api.RetrofitClient
+import com.example.exoticpet.api.BackendRetrofitClient
 import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {
@@ -56,7 +56,7 @@ class RegisterActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 btnRegister.isEnabled = false
-                val response = RetrofitClient.instance.register(RegisterRequest(username, password))
+                val response = BackendRetrofitClient.instance.register(RegisterRequest(username, password))
 
                 if (response.isSuccessful && response.body()?.success == true) {
                     Toast.makeText(this@RegisterActivity, "注册成功，请登录", Toast.LENGTH_SHORT).show()

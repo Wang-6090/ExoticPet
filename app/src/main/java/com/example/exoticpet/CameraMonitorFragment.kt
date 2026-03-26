@@ -25,6 +25,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import com.example.exoticpet.api.BackendRetrofitClient
+import com.example.exoticpet.models.Pet
 
 class CameraMonitorFragment : Fragment() {
 
@@ -243,8 +245,7 @@ class CameraMonitorFragment : Fragment() {
     private fun analyzeImage(bitmap: Bitmap) {
         lifecycleScope.launch {
             try {
-                val pet = dbHelper.getPet()
-                // 压缩图片以减少上传大小
+                val pet = loadPetForAnalysis()
                 val compressedBitmap = compressBitmap(bitmap)
                 analysisViewModel.analyzeImage(compressedBitmap, pet)
             } catch (e: Exception) {
@@ -270,6 +271,41 @@ class CameraMonitorFragment : Fragment() {
             return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
         }
         return bitmap
+    }
+
+    private suspend fun loadPetForAnalysis(): Pet {
+        val userId = UserSession.getUserId(requireContext())
+
+        if (userId != 0) {
+            try {
+                val response = BackendRetrofitClient.instance.getMyPet(userId)
+                if (response.isSuccessful && response.body() != null) {
+                    val dto = response.body()!!
+
+                    val pet = Pet(
+                        id = dto.id ?: 1,
+                        name = dto.name,
+                        species = dto.species,
+                        gender = dto.gender ?: "",
+                        birthDate = dto.birthDate ?: "",
+                        length = dto.length ?: 0.0,
+                        weight = dto.weight ?: 0.0,
+                        specialMark = dto.specialMark ?: "",
+                        enclosureSize = dto.enclosureSize ?: "",
+                        stapleFood = dto.stapleFood ?: "",
+                        healthScore = dto.healthScore ?: 0,
+                        lastCheckup = dto.lastCheckup ?: ""
+                    )
+
+                    dbHelper.updatePet(pet)
+                    return pet
+                }
+            } catch (e: Exception) {
+                Log.e("CameraMonitorFragment", "从后端获取宠物资料失败，改用本地资料", e)
+            }
+        }
+
+        return dbHelper.getPet()
     }
 
     private fun rotateBitmapIfNeeded(bitmap: Bitmap): Bitmap {

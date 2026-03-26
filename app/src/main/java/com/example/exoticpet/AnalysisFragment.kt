@@ -22,8 +22,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.exoticpet.viewmodel.AnalysisViewModel
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import com.example.exoticpet.api.RetrofitClient
+import com.example.exoticpet.api.BackendRetrofitClient
 import com.example.exoticpet.api.RecordRequest
+import com.example.exoticpet.models.Pet
+import android.util.Log
 
 class AnalysisFragment : Fragment() {
 
@@ -136,11 +138,13 @@ class AnalysisFragment : Fragment() {
 
         btnAnalyze.setOnClickListener {
             if (currentImageBitmap != null) {
-                try {
-                    val pet = dbHelper.getPet()
-                    viewModel.analyzeImage(currentImageBitmap!!, pet)
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "获取宠物信息失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        val pet = loadPetForAnalysis()
+                        viewModel.analyzeImage(currentImageBitmap!!, pet)
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "获取宠物信息失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             } else {
                 Toast.makeText(requireContext(), "请先选择图片", Toast.LENGTH_SHORT).show()
@@ -224,6 +228,41 @@ class AnalysisFragment : Fragment() {
         selectedTab.backgroundTintList = selectedBg
     }
 
+    private suspend fun loadPetForAnalysis(): Pet {
+        val userId = UserSession.getUserId(requireContext())
+
+        if (userId != 0) {
+            try {
+                val response = BackendRetrofitClient.instance.getMyPet(userId)
+                if (response.isSuccessful && response.body() != null) {
+                    val dto = response.body()!!
+
+                    val pet = Pet(
+                        id = dto.id ?: 1,
+                        name = dto.name,
+                        species = dto.species,
+                        gender = dto.gender ?: "",
+                        birthDate = dto.birthDate ?: "",
+                        length = dto.length ?: 0.0,
+                        weight = dto.weight ?: 0.0,
+                        specialMark = dto.specialMark ?: "",
+                        enclosureSize = dto.enclosureSize ?: "",
+                        stapleFood = dto.stapleFood ?: "",
+                        healthScore = dto.healthScore ?: 0,
+                        lastCheckup = dto.lastCheckup ?: ""
+                    )
+
+                    dbHelper.updatePet(pet)
+                    return pet
+                }
+            } catch (e: Exception) {
+                Log.e("AnalysisFragment", "从后端获取宠物资料失败，改用本地资料", e)
+            }
+        }
+
+        return dbHelper.getPet()
+    }
+
     private fun observeViewModel() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             if (isLoading) {
@@ -293,7 +332,7 @@ class AnalysisFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                RetrofitClient.instance.saveAnalysisRecord(
+                BackendRetrofitClient.instance.saveAnalysisRecord(
                     RecordRequest(
                         userId = userId,
                         date = date,

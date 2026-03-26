@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import com.example.exoticpet.config.AiConfig
 
 class AnalysisRepository {
 
@@ -52,7 +53,7 @@ class AnalysisRepository {
         prompt: String
     ): String {
         val request = QwenVLRequest(
-            model = "qwen-vl-plus",
+            model = AiConfig.MODEL,
             input = QwenVLInput(
                 messages = listOf(
                     QwenVLMessage(
@@ -67,7 +68,7 @@ class AnalysisRepository {
         )
 
         val response = api.analyzeWithQwenVL(
-            authorization = "Bearer ${RetrofitClient.DASHSCOPE_API_KEY}",
+            authorization = "Bearer ${AiConfig.API_KEY}",
             request = request
         )
 
@@ -120,69 +121,86 @@ class AnalysisRepository {
 
     private fun buildPromptByType(type: String, pet: Pet): String {
         val petInfo =
-            "宠物信息：${pet.name}，种类：${pet.species}，年龄：${pet.birthDate}，体重：${pet.weight}g，体长：${pet.length}cm"
+            "登记宠物资料（仅供参考，可能与图片不一致）：名字=${pet.name}，登记种类=${pet.species}，出生日期=${pet.birthDate}，体重=${pet.weight}g，体长=${pet.length}cm"
 
         return when (type) {
             "health" -> """
-                你是一位专业的异宠兽医。请分析这张图片中的宠物健康状况。
-                $petInfo
-                
-                请仔细分析图片中的宠物，包括：
-                1. 整体外观状态
-                2. 皮肤/鳞片/毛发状况
-                3. 体型和姿态
-                4. 眼睛、四肢等细节
-                
-                请严格按以下JSON格式回答，只返回JSON，不要有其他内容：
-                {
-                    "status": "健康/需要注意/紧急",
-                    "score": 0,
-                    "analysis": "详细分析结果",
-                    "suggestions": "饲养建议",
-                    "warnings": "注意事项",
-                    "confidence": 0.0
-                }
-            """.trimIndent()
+            你是一位专业的异宠兽医。
+            请先根据图片本身识别动物种类和健康状态，再参考登记资料辅助判断。
+            
+            $petInfo
+            
+            重要要求：
+            1. 不要因为登记资料里写了“${pet.species}”，就默认图片中的动物一定是${pet.species}。
+            2. 必须优先依据图片内容识别动物。
+            3. 如果图片中的动物与登记资料不一致，请明确指出，并以图片中的动物为准。
+            4. 如果图片中没有清晰可见的动物，请返回“无法判断”。
+            5. 只返回 JSON，不要返回 markdown，不要返回项目符号，不要解释过程。
+            
+            请严格按以下 JSON 返回：
+            {
+              "detected_species": "图片中识别到的动物种类，无法确定就写无法确定",
+              "pet_info_match": true,
+              "status": "健康/需要注意/紧急/无法判断",
+              "score": 0,
+              "analysis": "根据图片做出的详细分析",
+              "suggestions": "饲养建议",
+              "warnings": "注意事项",
+              "confidence": 0.0
+            }
+        """.trimIndent()
 
             "behavior" -> """
-                你是一位专业的异宠行为学家。请分析这张图片中宠物的行为状态。
-                $petInfo
-                
-                请分析图片中宠物的行为表现，包括：
-                1. 活动状态（活跃/安静/紧张）
-                2. 姿态和动作
-                3. 对环境反应
-                
-                请严格按以下JSON格式回答，只返回JSON，不要有其他内容：
-                {
-                    "status": "正常/活跃/异常",
-                    "score": 0,
-                    "analysis": "行为分析",
-                    "suggestions": "行为引导建议",
-                    "warnings": "注意事项",
-                    "confidence": 0.0
-                }
-            """.trimIndent()
+            你是一位专业的异宠行为学家。
+            请先根据图片本身识别动物种类和行为状态，再参考登记资料辅助判断。
+            
+            $petInfo
+            
+            重要要求：
+            1. 不要因为登记资料里写了“${pet.species}”，就默认图片中的动物一定是${pet.species}。
+            2. 必须优先依据图片内容识别动物和行为状态。
+            3. 如果图片中的动物与登记资料不一致，请明确指出，并以图片中的动物为准。
+            4. 如果图片中没有清晰可见的动物，请返回“无法判断”。
+            5. 只返回 JSON，不要返回 markdown，不要返回项目符号，不要解释过程。
+            
+            请严格按以下 JSON 返回：
+            {
+              "detected_species": "图片中识别到的动物种类，无法确定就写无法确定",
+              "pet_info_match": true,
+              "status": "正常/活跃/异常/无法判断",
+              "score": 0,
+              "analysis": "行为分析",
+              "suggestions": "行为引导建议",
+              "warnings": "注意事项",
+              "confidence": 0.0
+            }
+        """.trimIndent()
 
             else -> """
-                你是一位专业的异宠营养师。请分析这张图片中宠物的饮食状况。
-                $petInfo
-                
-                请分析图片中与饮食相关的内容：
-                1. 体型判断（偏瘦/正常/偏胖）
-                2. 进食环境
-                3. 可能的营养状况
-                
-                请严格按以下JSON格式回答，只返回JSON，不要有其他内容：
-                {
-                    "status": "正常/需改善/异常",
-                    "score": 0,
-                    "analysis": "饮食分析",
-                    "suggestions": "饮食建议",
-                    "warnings": "注意事项",
-                    "confidence": 0.0
-                }
-            """.trimIndent()
+            你是一位专业的异宠营养师。
+            请先根据图片本身识别动物种类和体态，再参考登记资料辅助判断。
+            
+            $petInfo
+            
+            重要要求：
+            1. 不要因为登记资料里写了“${pet.species}”，就默认图片中的动物一定是${pet.species}。
+            2. 必须优先依据图片内容识别动物和体态。
+            3. 如果图片中的动物与登记资料不一致，请明确指出，并以图片中的动物为准。
+            4. 如果图片中没有清晰可见的动物，请返回“无法判断”。
+            5. 只返回 JSON，不要返回 markdown，不要返回项目符号，不要解释过程。
+            
+            请严格按以下 JSON 返回：
+            {
+              "detected_species": "图片中识别到的动物种类，无法确定就写无法确定",
+              "pet_info_match": true,
+              "status": "正常/需改善/异常/无法判断",
+              "score": 0,
+              "analysis": "饮食或体态分析",
+              "suggestions": "饮食建议",
+              "warnings": "注意事项",
+              "confidence": 0.0
+            }
+        """.trimIndent()
         }
     }
 
@@ -194,6 +212,12 @@ class AnalysisRepository {
                 cleanedResponse = cleanedResponse.removePrefix("```json").removeSuffix("```").trim()
             } else if (cleanedResponse.startsWith("```")) {
                 cleanedResponse = cleanedResponse.removePrefix("```").removeSuffix("```").trim()
+            }
+
+            val jsonStart = cleanedResponse.indexOf("{")
+            val jsonEnd = cleanedResponse.lastIndexOf("}")
+            if (jsonStart >= 0 && jsonEnd > jsonStart) {
+                cleanedResponse = cleanedResponse.substring(jsonStart, jsonEnd + 1)
             }
 
             val json = JSONObject(cleanedResponse)

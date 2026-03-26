@@ -14,7 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.exoticpet.api.RecordDto
-import com.example.exoticpet.api.RetrofitClient
+import com.example.exoticpet.api.BackendRetrofitClient
 import kotlinx.coroutines.launch
 
 class HistoryFragment : Fragment() {
@@ -92,7 +92,7 @@ class HistoryFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val response = RetrofitClient.instance.getRecords(userId, currentFilter)
+                val response = BackendRetrofitClient.instance.getRecords(userId, currentFilter)
 
                 if (!response.isSuccessful) {
                     Toast.makeText(

@@ -1,15 +1,13 @@
 package com.example.exoticpet.api
 
-import com.example.exoticpet.config.AiConfig
+import com.example.exoticpet.config.BackendConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
-object RetrofitClient {
-
-    const val DASHSCOPE_API_KEY = AiConfig.API_KEY
+object BackendRetrofitClient {
 
     private val client: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().apply {
@@ -20,12 +18,12 @@ object RetrofitClient {
         .writeTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    val instance: DashScopeApiService by lazy {
+    val instance: BackendApiService by lazy {
         Retrofit.Builder()
-            .baseUrl(AiConfig.BASE_URL)
+            .baseUrl(BackendConfig.BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(DashScopeApiService::class.java)
+            .create(BackendApiService::class.java)
     }
 }

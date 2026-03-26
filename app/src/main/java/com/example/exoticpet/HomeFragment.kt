@@ -15,7 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.exoticpet.api.RecordDto
-import com.example.exoticpet.api.RetrofitClient
+import com.example.exoticpet.api.BackendRetrofitClient
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
@@ -105,7 +105,7 @@ class HomeFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val response = RetrofitClient.instance.getMyPet(userId)
+                val response = BackendRetrofitClient.instance.getMyPet(userId)
                 val pet = response.body()
 
                 if (response.isSuccessful && pet != null) {
@@ -150,7 +150,7 @@ class HomeFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val response = RetrofitClient.instance.getRecords(userId, "全部")
+                val response = BackendRetrofitClient.instance.getRecords(userId, "全部")
                 val records = response.body().orEmpty()
                 val recentRecords = if (records.size > 2) records.subList(0, 2) else records
                 recyclerView.adapter = RecentRecordsAdapter(recentRecords)

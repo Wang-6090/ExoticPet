@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.example.exoticpet.api.LoginRequest
-import com.example.exoticpet.api.RetrofitClient
+import com.example.exoticpet.api.BackendRetrofitClient
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
@@ -60,7 +60,7 @@ class LoginActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 btnLogin.isEnabled = false
-                val response = RetrofitClient.instance.login(LoginRequest(username, password))
+                val response = BackendRetrofitClient.instance.login(LoginRequest(username, password))
 
                 if (response.isSuccessful && response.body()?.success == true) {
                     val body = response.body()!!
